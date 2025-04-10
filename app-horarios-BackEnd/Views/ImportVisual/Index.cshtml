@@ -1,0 +1,20 @@
+﻿@{
+    ViewBag.Title = "Importar Dados de Excel";
+}
+
+<h2>Importar Dados de Excel com Várias Folhas</h2>
+
+<form asp-action="Index" method="post" enctype="multipart/form-data">
+    <div class="form-group">
+        <label for="file">Seleciona o ficheiro Excel (.xlsx):</label>
+        <input type="file" name="file" class="form-control" required />
+    </div>
+    <button type="submit" class="btn btn-primary mt-2">Importar</button>
+</form>
+
+@if (ViewBag.Message != null)
+{
+    <div class="alert alert-info mt-3">
+        @ViewBag.Message
+    </div>
+}
