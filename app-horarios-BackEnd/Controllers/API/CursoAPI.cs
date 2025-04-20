@@ -32,7 +32,6 @@ namespace app_horarios_BackEnd.Controllers.API
                 {
                     Id = c.Id,
                     Nome = c.Nome,
-                    Tipo = c.Tipo,
                     NomeEscola = c.Escola.Nome
                 })
                 .ToListAsync();

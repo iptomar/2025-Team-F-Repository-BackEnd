@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using app_horarios_BackEnd.Data;
@@ -11,9 +12,11 @@ using app_horarios_BackEnd.Data;
 namespace app_horarios_BackEnd.Migrations
 {
     [DbContext(typeof(HorarioDbContext))]
-    partial class HorarioDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250411122944_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -180,6 +183,10 @@ namespace app_horarios_BackEnd.Migrations
                     b.Property<int?>("RamoId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.HasKey("Id");
 
                     b.HasIndex("EscolaId");
@@ -227,6 +234,9 @@ namespace app_horarios_BackEnd.Migrations
 
                     b.Property<int?>("Ano")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Grau")
+                        .HasColumnType("text");
 
                     b.Property<int?>("HorasCampo")
                         .HasColumnType("integer");
@@ -673,7 +683,7 @@ namespace app_horarios_BackEnd.Migrations
                         .IsRequired();
 
                     b.HasOne("App_horarios_BackEnd.Models.Grau", "Grau")
-                        .WithMany()
+                        .WithMany("Cursos")
                         .HasForeignKey("GrauId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -717,7 +727,7 @@ namespace app_horarios_BackEnd.Migrations
                         .IsRequired();
 
                     b.HasOne("App_horarios_BackEnd.Models.Disciplina", "Disciplina")
-                        .WithMany("DisciplinaCursoProfessores")
+                        .WithMany()
                         .HasForeignKey("DisciplinaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -833,16 +843,16 @@ namespace app_horarios_BackEnd.Migrations
                     b.Navigation("Turmas");
                 });
 
-            modelBuilder.Entity("App_horarios_BackEnd.Models.Disciplina", b =>
-                {
-                    b.Navigation("DisciplinaCursoProfessores");
-                });
-
             modelBuilder.Entity("App_horarios_BackEnd.Models.Escola", b =>
                 {
                     b.Navigation("Cursos");
 
                     b.Navigation("Salas");
+                });
+
+            modelBuilder.Entity("App_horarios_BackEnd.Models.Grau", b =>
+                {
+                    b.Navigation("Cursos");
                 });
 
             modelBuilder.Entity("App_horarios_BackEnd.Models.Horario", b =>

@@ -17,6 +17,8 @@ public class HorarioDbContext : DbContext
     public DbSet<Professor> Professores { get; set; }
     public DbSet<Disciplina> Disciplinas { get; set; }
     public DbSet<DisciplinaCursoProfessor> DisciplinaCursoProfessor { get; set; }
+    public DbSet<Ramo> Ramos { get; set; }
+    public DbSet<Grau> Graus { get; set; }
     public DbSet<Horario> Horarios { get; set; }
     public DbSet<TipoAula> TiposAula { get; set; }
     public DbSet<BlocoHorario> BlocosHorario { get; set; }

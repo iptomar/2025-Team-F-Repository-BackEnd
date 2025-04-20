@@ -1,0 +1,31 @@
+@model App_horarios_BackEnd.Models.Localizacao
+
+@{
+ViewData["Title"] = "Detalhes da Localização";
+}
+
+<h1>Detalhes da Localização</h1>
+<hr />
+
+<div class="card shadow-sm p-4 mb-4 bg-white rounded">
+    <dl class="row">
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Nome)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Nome)
+        </dd>
+
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Abreviacao)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Abreviacao)
+        </dd>
+    </dl>
+</div>
+
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-warning me-2">Editar</a>
+    <a asp-action="Index" class="btn btn-secondary">Voltar à Lista</a>
+</div>

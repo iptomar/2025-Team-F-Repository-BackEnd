@@ -53,6 +53,19 @@ namespace app_horarios_BackEnd.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Graus",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Nome = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Graus", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Localizacoes",
                 columns: table => new
                 {
@@ -64,6 +77,19 @@ namespace app_horarios_BackEnd.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Localizacoes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Ramos",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "integer", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Nome = table.Column<string>(type: "text", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Ramos", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -148,8 +174,10 @@ namespace app_horarios_BackEnd.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Nome = table.Column<string>(type: "text", nullable: false),
-                    Tipo = table.Column<string>(type: "text", nullable: true),
-                    EscolaId = table.Column<int>(type: "integer", nullable: false)
+                    Tipo = table.Column<string>(type: "text", nullable: false),
+                    EscolaId = table.Column<int>(type: "integer", nullable: false),
+                    RamoId = table.Column<int>(type: "integer", nullable: true),
+                    GrauId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -160,6 +188,17 @@ namespace app_horarios_BackEnd.Migrations
                         principalTable: "Escolas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Cursos_Graus_GrauId",
+                        column: x => x.GrauId,
+                        principalTable: "Graus",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Cursos_Ramos_RamoId",
+                        column: x => x.RamoId,
+                        principalTable: "Ramos",
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -246,7 +285,7 @@ namespace app_horarios_BackEnd.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     DisciplinaId = table.Column<int>(type: "integer", nullable: false),
                     CursoId = table.Column<int>(type: "integer", nullable: false),
-                    ProfessorId = table.Column<int>(type: "integer", nullable: false)
+                    ProfessorId = table.Column<int>(type: "integer", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -267,8 +306,7 @@ namespace app_horarios_BackEnd.Migrations
                         name: "FK_DisciplinaCursoProfessor_Professores_ProfessorId",
                         column: x => x.ProfessorId,
                         principalTable: "Professores",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
+                        principalColumn: "Id");
                 });
 
             migrationBuilder.CreateTable(
@@ -505,6 +543,16 @@ namespace app_horarios_BackEnd.Migrations
                 column: "EscolaId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Cursos_GrauId",
+                table: "Cursos",
+                column: "GrauId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Cursos_RamoId",
+                table: "Cursos",
+                column: "RamoId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_DiretoresCurso_CursoId",
                 table: "DiretoresCurso",
                 column: "CursoId");
@@ -631,6 +679,12 @@ namespace app_horarios_BackEnd.Migrations
 
             migrationBuilder.DropTable(
                 name: "Escolas");
+
+            migrationBuilder.DropTable(
+                name: "Graus");
+
+            migrationBuilder.DropTable(
+                name: "Ramos");
 
             migrationBuilder.DropTable(
                 name: "Localizacoes");

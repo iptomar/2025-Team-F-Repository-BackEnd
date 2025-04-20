@@ -1,6 +1,6 @@
 @app_horarios_BackEnd_HostAddress = http://localhost:5281
 
-GET {{app_horarios_BackEnd_HostAddress}}/weatherforecast/
+GET {{app_horarios_BackEnd_HostAddress}}/Sala/Index/
 Accept: application/json
 
 ###

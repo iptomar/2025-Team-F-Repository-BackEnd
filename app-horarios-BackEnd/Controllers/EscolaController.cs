@@ -1,3 +1,7 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -6,23 +10,23 @@ using app_horarios_BackEnd.Data;
 
 namespace app_horarios_BackEnd.Controllers
 {
-    public class SalaController : Controller
+    public class EscolaController : Controller
     {
         private readonly HorarioDbContext _context;
 
-        public SalaController(HorarioDbContext context)
+        public EscolaController(HorarioDbContext context)
         {
             _context = context;
         }
 
-        // GET: SalaController
+        // GET: Escola
         public async Task<IActionResult> Index()
         {
-            var horarioDbContext = _context.Salas.Include(s => s.Escola);
+            var horarioDbContext = _context.Escolas.Include(e => e.Localizacao);
             return View(await horarioDbContext.ToListAsync());
         }
 
-        // GET: SalaController/Details/5
+        // GET: Escola/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -30,60 +34,42 @@ namespace app_horarios_BackEnd.Controllers
                 return NotFound();
             }
 
-            var sala = await _context.Salas
-                .Include(s => s.Escola)
+            var escola = await _context.Escolas
+                .Include(e => e.Localizacao)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (sala == null)
+            if (escola == null)
             {
                 return NotFound();
             }
 
-            return View(sala);
+            return View(escola);
         }
 
-        // GET: SalaController/Create
+        // GET: Escola/Create
         public IActionResult Create()
         {
-            ViewBag.EscolaId = new SelectList(_context.Escolas, "Id", "Nome");
+            ViewData["LocalizacaoId"] = new SelectList(_context.Localizacoes, "Id", "Id");
             return View();
-
         }
 
-        // POST: SalaController/Create
+        // POST: Escola/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Capacidade,Tipo,EscolaId")] Sala sala)
+        public async Task<IActionResult> Create([Bind("Id,Nome,LocalizacaoId")] Escola escola)
         {
-            var salaJson = System.Text.Json.JsonSerializer.Serialize(sala);
-            Console.WriteLine($"POST payload: {salaJson}");
-
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                // Recupera a escola associada, se EscolaId for válido
-                sala.Escola = await _context.Escolas.FindAsync(sala.EscolaId);
-
-                // Validação adicional se necessário
-                if (sala.Escola == null)
-                {
-                    ModelState.AddModelError(string.Empty, "A escola selecionada não é válida.");
-                }
-
-                // Recarrega o dropdown de escolas com seleção atual
-                ViewBag.EscolaId = new SelectList(_context.Escolas, "Id", "Nome", sala.EscolaId);
-                return View(sala);
+                _context.Add(escola);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
             }
-
-            _context.Add(sala);
-            await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Sala criada com sucesso!";
-            return RedirectToAction(nameof(Index));
+            ViewData["LocalizacaoId"] = new SelectList(_context.Localizacoes, "Id", "Id", escola.LocalizacaoId);
+            return View(escola);
         }
 
-
-
-        // GET: SalaController/Edit/5
+        // GET: Escola/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -91,23 +77,23 @@ namespace app_horarios_BackEnd.Controllers
                 return NotFound();
             }
 
-            var sala = await _context.Salas.FindAsync(id);
-            if (sala == null)
+            var escola = await _context.Escolas.FindAsync(id);
+            if (escola == null)
             {
                 return NotFound();
             }
-            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Id", sala.EscolaId);
-            return View(sala);
+            ViewData["LocalizacaoId"] = new SelectList(_context.Localizacoes, "Id", "Id", escola.LocalizacaoId);
+            return View(escola);
         }
 
-        // POST: SalaController/Edit/5
+        // POST: Escola/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Capacidade,Tipo,EscolaId")] Sala sala)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,LocalizacaoId")] Escola escola)
         {
-            if (id != sala.Id)
+            if (id != escola.Id)
             {
                 return NotFound();
             }
@@ -116,12 +102,12 @@ namespace app_horarios_BackEnd.Controllers
             {
                 try
                 {
-                    _context.Update(sala);
+                    _context.Update(escola);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!SalaExists(sala.Id))
+                    if (!EscolaExists(escola.Id))
                     {
                         return NotFound();
                     }
@@ -132,11 +118,11 @@ namespace app_horarios_BackEnd.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Id", sala.EscolaId);
-            return View(sala);
+            ViewData["LocalizacaoId"] = new SelectList(_context.Localizacoes, "Id", "Id", escola.LocalizacaoId);
+            return View(escola);
         }
 
-        // GET: SalaController/Delete/5
+        // GET: Escola/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -144,35 +130,35 @@ namespace app_horarios_BackEnd.Controllers
                 return NotFound();
             }
 
-            var sala = await _context.Salas
-                .Include(s => s.Escola)
+            var escola = await _context.Escolas
+                .Include(e => e.Localizacao)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (sala == null)
+            if (escola == null)
             {
                 return NotFound();
             }
 
-            return View(sala);
+            return View(escola);
         }
 
-        // POST: SalaController/Delete/5
+        // POST: Escola/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var sala = await _context.Salas.FindAsync(id);
-            if (sala != null)
+            var escola = await _context.Escolas.FindAsync(id);
+            if (escola != null)
             {
-                _context.Salas.Remove(sala);
+                _context.Escolas.Remove(escola);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool SalaExists(int id)
+        private bool EscolaExists(int id)
         {
-            return _context.Salas.Any(e => e.Id == id);
+            return _context.Escolas.Any(e => e.Id == id);
         }
     }
 }

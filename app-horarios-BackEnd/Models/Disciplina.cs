@@ -6,7 +6,6 @@ public class Disciplina
     public string Nome { get; set; }
 
     public string? Plano { get; set; }
-    public string? Grau { get; set; }
     public int? Ano { get; set; }
     public string? Semestre { get; set; }
     public string? Tipo { get; set; }
@@ -20,4 +19,6 @@ public class Disciplina
     public int? HorasOrientacao { get; set; }
     public int? HorasEstagio { get; set; }
     public int? HorasOutras { get; set; }
+    
+    public ICollection<DisciplinaCursoProfessor> DisciplinaCursoProfessores { get; set; }
 }
