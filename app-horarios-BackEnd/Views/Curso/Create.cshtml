@@ -1,0 +1,60 @@
+@model App_horarios_BackEnd.Models.Curso
+
+@{
+ViewData["Title"] = "Criar Curso";
+}
+
+<h1>Criar Curso</h1>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+            <!-- Nome -->
+            <div class="mb-3">
+                <label asp-for="Nome" class="form-label"></label>
+                <input asp-for="Nome" class="form-control" />
+                <span asp-validation-for="Nome" class="text-danger"></span>
+            </div>
+
+            <!-- Escola -->
+            <div class="mb-3">
+                <label asp-for="EscolaId" class="form-label"></label>
+                <select asp-for="EscolaId" class="form-select" asp-items="ViewBag.EscolaId">
+                    <option value="">-- Seleciona a Escola --</option>
+                </select>
+                <span asp-validation-for="EscolaId" class="text-danger"></span>
+            </div>
+
+            <!-- Ramo -->
+            <div class="mb-3">
+                <label asp-for="RamoId" class="form-label"></label>
+                <select asp-for="RamoId" class="form-select" asp-items="ViewBag.RamoId">
+                    <option value="">-- Seleciona o Ramo --</option>
+                </select>
+                <span asp-validation-for="RamoId" class="text-danger"></span>
+            </div>
+
+            <!-- Grau -->
+            <div class="mb-3">
+                <label asp-for="GrauId" class="form-label"></label>
+                <select asp-for="GrauId" class="form-select" asp-items="ViewBag.GrauId">
+                    <option value="">-- Seleciona o Grau --</option>
+                </select>
+                <span asp-validation-for="GrauId" class="text-danger"></span>
+            </div>
+
+            <!-- Botões -->
+            <div class="d-flex align-items-center">
+                <button type="submit" class="btn btn-primary">Criar</button>
+                <a asp-action="Index" class="btn btn-secondary ms-2">Voltar à Lista</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

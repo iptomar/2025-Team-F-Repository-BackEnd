@@ -1,14 +1,14 @@
-@model App_horarios_BackEnd.Models.Escola
+@model App_horarios_BackEnd.Models.Curso
 
 @{
-ViewData["Title"] = "Eliminar Escola";
+ViewData["Title"] = "Eliminar Curso";
 }
 
-<h1>Eliminar Escola</h1>
+<h1>Eliminar Curso</h1>
 <hr />
 
 <div class="alert alert-warning" role="alert">
-    <h5 class="mb-3">Tens a certeza que queres eliminar esta escola?</h5>
+    <h5 class="mb-3">Tens a certeza que queres eliminar este curso?</h5>
 
     <div class="card shadow-sm p-4 bg-white rounded">
         <dl class="row">
@@ -20,10 +20,24 @@ ViewData["Title"] = "Eliminar Escola";
             </dd>
 
             <dt class="col-sm-3">
-                @Html.DisplayNameFor(model => model.Localizacao)
+                @Html.DisplayNameFor(model => model.Escola)
             </dt>
             <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.Localizacao.Nome)
+                @Html.DisplayFor(model => model.Escola.Nome)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Ramo)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Ramo.Nome)
+            </dd>
+
+            <dt class="col-sm-3">
+                @Html.DisplayNameFor(model => model.Grau)
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Grau.Nome)
             </dd>
         </dl>
     </div>

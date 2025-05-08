@@ -1,14 +1,15 @@
-@model App_horarios_BackEnd.Models.Sala
+@model App_horarios_BackEnd.Models.Curso
 
 @{
-ViewData["Title"] = "Detalhes da Sala";
+ViewData["Title"] = "Detalhes do Curso";
 }
 
-<h1>Detalhes da Sala</h1>
+<h1>Detalhes do Curso</h1>
 <hr />
 
 <div class="card shadow-sm p-4 mb-4 bg-white rounded">
     <dl class="row">
+        <!-- Nome -->
         <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.Nome)
         </dt>
@@ -16,25 +17,28 @@ ViewData["Title"] = "Detalhes da Sala";
             @Html.DisplayFor(model => model.Nome)
         </dd>
 
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Capacidade)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Capacidade)
-        </dd>
-
-        <dt class="col-sm-3">
-            @Html.DisplayNameFor(model => model.Tipo)
-        </dt>
-        <dd class="col-sm-9">
-            @Html.DisplayFor(model => model.Tipo)
-        </dd>
-
+        <!-- Escola -->
         <dt class="col-sm-3">
             @Html.DisplayNameFor(model => model.Escola)
         </dt>
         <dd class="col-sm-9">
             @Html.DisplayFor(model => model.Escola.Nome)
+        </dd>
+
+        <!-- Ramo -->
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Ramo)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Ramo.Nome)
+        </dd>
+
+        <!-- Grau -->
+        <dt class="col-sm-3">
+            @Html.DisplayNameFor(model => model.Grau)
+        </dt>
+        <dd class="col-sm-9">
+            @Html.DisplayFor(model => model.Grau.Nome)
         </dd>
     </dl>
 </div>

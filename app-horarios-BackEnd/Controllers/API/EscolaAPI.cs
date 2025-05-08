@@ -5,9 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using App_horarios_BackEnd.Models;
-using app_horarios_BackEnd.Data;
 using App_horarios_BackEnd.Models.DTO;
+using app_horarios_BackEnd.Data;
+using App_horarios_BackEnd.Models;
 
 namespace app_horarios_BackEnd.Controllers.API
 {
@@ -22,92 +22,121 @@ namespace app_horarios_BackEnd.Controllers.API
             _context = context;
         }
 
-        // GET: api/EscolaAPI
+       // GET: api/EscolaAPI
         [HttpGet]
         public async Task<ActionResult<IEnumerable<EscolaDto>>> GetEscolas()
         {
             var escolas = await _context.Escolas
                 .Include(e => e.Localizacao)
+                .Include(e => e.Cursos).ThenInclude(c => c.Grau)
                 .Include(e => e.Salas)
+                .Select(e => new EscolaDto
+                {
+                    Id = e.Id,
+                    Nome = e.Nome,
+                    Localizacao = new LocalizacaoDto
+                    {
+                        Id = e.Localizacao.Id,
+                        Nome = e.Localizacao.Nome,
+                        Abreviacao = e.Localizacao.Abreviacao
+                    },
+                    Cursos = e.Cursos.Select(c => new CursoDto
+                    {
+                        Id = c.Id,
+                        Nome = c.Nome,
+                        Tipo = c.Grau.Nome,
+                        IdEscola = e.Id
+                    }).ToList(),
+                    Salas = e.Salas.Select(s => new SalaDto
+                    {
+                        Id = s.Id,
+                        Nome = s.Nome,
+                        Capacidade = s.Capacidade,
+                        Tipo = s.Tipo,
+                        NomeEscola = e.Nome
+                    }).ToList()
+                })
                 .ToListAsync();
 
-            var escolasDto = escolas.Select(e => new EscolaDto
-            {
-                Id = e.Id,
-                Nome = e.Nome,
-                Localizacao = new LocalizacaoDto
-                {
-                    Id = e.Localizacao.Id,
-                    Nome = e.Localizacao.Nome,
-                    Abreviacao = e.Localizacao.Abreviacao
-                },
-                Salas = e.Salas?.Select(s => new SalaDto
-                {
-                    Id = s.Id,
-                    Nome = s.Nome,
-                    Capacidade = s.Capacidade,
-                    Tipo = s.Tipo
-                }).ToList()
-            });
-
-            return Ok(escolasDto);
-
+            return escolas;
         }
 
         // GET: api/EscolaAPI/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Escola>> GetEscola(int id)
+        public async Task<ActionResult<EscolaDto>> GetEscola(int id)
         {
-            var escola = await _context.Escolas.FindAsync(id);
+            var escola = await _context.Escolas
+                .Include(e => e.Localizacao)
+                .Include(e => e.Cursos).ThenInclude(c => c.Grau)
+                .Include(e => e.Salas)
+                .FirstOrDefaultAsync(e => e.Id == id);
 
             if (escola == null)
-            {
                 return NotFound();
-            }
 
-            return escola;
-        }
-
-        // PUT: api/EscolaAPI/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutEscola(int id, Escola escola)
-        {
-            if (id != escola.Id)
+            var dto = new EscolaDto
             {
-                return BadRequest();
-            }
-
-            _context.Entry(escola).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!EscolaExists(id))
+                Id = escola.Id,
+                Nome = escola.Nome,
+                Localizacao = new LocalizacaoDto
                 {
-                    return NotFound();
-                }
-                else
+                    Id = escola.Localizacao.Id,
+                    Nome = escola.Localizacao.Nome,
+                    Abreviacao = escola.Localizacao.Abreviacao
+                },
+                Cursos = escola.Cursos.Select(c => new CursoDto
                 {
-                    throw;
-                }
-            }
+                    Id = c.Id,
+                    Nome = c.Nome,
+                    Tipo = c.Grau.Nome,
+                    IdEscola = escola.Id
+                }).ToList(),
+                Salas = escola.Salas.Select(s => new SalaDto
+                {
+                    Id = s.Id,
+                    Nome = s.Nome,
+                    Tipo = s.Tipo,
+                    Capacidade = s.Capacidade,
+                    NomeEscola = escola.Nome
+                }).ToList()
+            };
 
-            return NoContent();
+            return dto;
         }
 
         // POST: api/EscolaAPI
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Escola>> PostEscola(Escola escola)
+        public async Task<ActionResult<EscolaDto>> PostEscola(EscolaDto escolaDto)
         {
+            var escola = new Escola
+            {
+                Nome = escolaDto.Nome,
+                LocalizacaoId = escolaDto.Localizacao.Id
+            };
+
             _context.Escolas.Add(escola);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetEscola", new { id = escola.Id }, escola);
+            escolaDto.Id = escola.Id;
+            return CreatedAtAction(nameof(GetEscola), new { id = escola.Id }, escolaDto);
+        }
+
+        // PUT: api/EscolaAPI/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutEscola(int id, EscolaDto escolaDto)
+        {
+            if (id != escolaDto.Id)
+                return BadRequest();
+
+            var escola = await _context.Escolas.FindAsync(id);
+            if (escola == null)
+                return NotFound();
+
+            escola.Nome = escolaDto.Nome;
+            escola.LocalizacaoId = escolaDto.Localizacao.Id;
+
+            await _context.SaveChangesAsync();
+            return NoContent();
         }
 
         // DELETE: api/EscolaAPI/5
@@ -116,9 +145,7 @@ namespace app_horarios_BackEnd.Controllers.API
         {
             var escola = await _context.Escolas.FindAsync(id);
             if (escola == null)
-            {
                 return NotFound();
-            }
 
             _context.Escolas.Remove(escola);
             await _context.SaveChangesAsync();
@@ -126,9 +153,9 @@ namespace app_horarios_BackEnd.Controllers.API
             return NoContent();
         }
 
-        private bool EscolaExists(int id)
+        private bool EscolaDtoExists(int id)
         {
-            return _context.Escolas.Any(e => e.Id == id);
+            return _context.EscolaDto.Any(e => e.Id == id);
         }
     }
 }

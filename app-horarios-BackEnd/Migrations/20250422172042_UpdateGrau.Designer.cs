@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using app_horarios_BackEnd.Data;
@@ -11,9 +12,11 @@ using app_horarios_BackEnd.Data;
 namespace app_horarios_BackEnd.Migrations
 {
     [DbContext(typeof(HorarioDbContext))]
-    partial class HorarioDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250422172042_UpdateGrau")]
+    partial class UpdateGrau
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -331,14 +334,17 @@ namespace app_horarios_BackEnd.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Duracao")
-                        .IsRequired()
-                        .HasColumnType("text");
+                    b.Property<int>("Duracao")
+                        .HasColumnType("integer");
 
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Unidade")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 

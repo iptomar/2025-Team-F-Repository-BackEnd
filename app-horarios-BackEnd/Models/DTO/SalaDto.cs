@@ -6,4 +6,6 @@ public class SalaDto
     public string Nome { get; set; }
     public int Capacidade { get; set; }
     public string Tipo { get; set; }
+    
+    public string NomeEscola { get; set; }
 }

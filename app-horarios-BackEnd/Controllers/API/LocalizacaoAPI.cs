@@ -5,8 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using App_horarios_BackEnd.Models;
+using App_horarios_BackEnd.Models.DTO;
 using app_horarios_BackEnd.Data;
+using App_horarios_BackEnd.Models;
 
 namespace app_horarios_BackEnd.Controllers.API
 {
@@ -23,86 +24,82 @@ namespace app_horarios_BackEnd.Controllers.API
 
         // GET: api/LocalizacaoAPI
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Localizacao>>> GetLocalizacoes()
+        public async Task<ActionResult<IEnumerable<LocalizacaoDto>>> GetLocalizacaoDto()
         {
-            return await _context.Localizacoes.ToListAsync();
+            var localizacoes = await _context.Localizacoes
+                .Select(l => new LocalizacaoDto
+                {
+                    Id = l.Id,
+                    Nome = l.Nome,
+                    Abreviacao = l.Abreviacao
+                })
+                .ToListAsync();
+
+            return localizacoes;
         }
 
         // GET: api/LocalizacaoAPI/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Localizacao>> GetLocalizacao(int id)
+        public async Task<ActionResult<LocalizacaoDto>> GetLocalizacaoDto(int id)
         {
             var localizacao = await _context.Localizacoes.FindAsync(id);
 
             if (localizacao == null)
-            {
                 return NotFound();
-            }
 
-            return localizacao;
+            var dto = new LocalizacaoDto
+            {
+                Id = localizacao.Id,
+                Nome = localizacao.Nome,
+                Abreviacao = localizacao.Abreviacao
+            };
+
+            return dto;
         }
 
         // PUT: api/LocalizacaoAPI/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutLocalizacao(int id, Localizacao localizacao)
+        public async Task<IActionResult> PutLocalizacaoDto(int id, LocalizacaoDto localizacaoDto)
         {
-            if (id != localizacao.Id)
-            {
+            if (id != localizacaoDto.Id)
                 return BadRequest();
-            }
 
-            _context.Entry(localizacao).State = EntityState.Modified;
+            var localizacao = await _context.Localizacoes.FindAsync(id);
+            if (localizacao == null)
+                return NotFound();
 
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!LocalizacaoExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+            localizacao.Nome = localizacaoDto.Nome;
+            localizacao.Abreviacao = localizacaoDto.Abreviacao;
+
+            await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
         // POST: api/LocalizacaoAPI
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Localizacao>> PostLocalizacao(Localizacao localizacao)
+        public async Task<ActionResult<LocalizacaoDto>> PostLocalizacao(LocalizacaoDto localizacaoDto)
         {
+            var localizacao = new Localizacao
+            {
+                Nome = localizacaoDto.Nome,
+                Abreviacao = localizacaoDto.Abreviacao
+            };
+
             _context.Localizacoes.Add(localizacao);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetLocalizacao", new { id = localizacao.Id }, localizacao);
+            localizacaoDto.Id = localizacao.Id;
+
+            return CreatedAtAction(nameof(GetLocalizacaoDto), new { id = localizacao.Id }, localizacaoDto);
         }
+        
+        
 
-        // DELETE: api/LocalizacaoAPI/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteLocalizacao(int id)
+        private bool LocalizacaoDtoExists(int id)
         {
-            var localizacao = await _context.Localizacoes.FindAsync(id);
-            if (localizacao == null)
-            {
-                return NotFound();
-            }
-
-            _context.Localizacoes.Remove(localizacao);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool LocalizacaoExists(int id)
-        {
-            return _context.Localizacoes.Any(e => e.Id == id);
+            return _context.LocalizacaoDto.Any(e => e.Id == id);
         }
     }
 }
