@@ -1,8 +1,4 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using App_horarios_BackEnd.Models.DTO;
@@ -27,7 +23,7 @@ namespace app_horarios_BackEnd.Controllers.API
         public async Task<ActionResult<IEnumerable<BlocoPreviewDto>>> GetDisciplinasParaHorario(int cursoId, int ano, int semestre)
         {
             var blocos = await _context.Disciplinas
-                .Where(d => d.Ano == ano && d.Semestre == semestre.ToString())
+                .Where(d => d.Ano == ano && d.Semestre == semestre)
                 .Include(d => d.DisciplinaCursoProfessores)
                 .ThenInclude(dcp => dcp.Professor)
                 .Include(d => d.DisciplinaCursoProfessores)
@@ -46,74 +42,69 @@ namespace app_horarios_BackEnd.Controllers.API
             return blocos;
         }
 
-        // GET: api/BlocoHorarioAPI/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<BlocoHorarioDto>> GetBlocoHorarioDto(int id)
+        [HttpGet("por-curso/{cursoId}/ano/{ano}/semestre/{semestre}")]
+        public async Task<ActionResult<IEnumerable<BlocoHorarioVisualDto>>> GetBlocosPorCursoESemestre(int cursoId, int semestre , int ano)
         {
-            var blocoHorarioDto = await _context.BlocoHorarioDto.FindAsync(id);
+            var blocos = await _context.BlocosHorario
+                .Include(b => b.Disciplina).ThenInclude(d => d.DisciplinaCursoProfessores)
+                .Include(b => b.Sala)
+                .Include(b => b.TipoAula)
+                .Include(b => b.Horario)
+                .Include(b => b.BlocosProfessor).ThenInclude(bp => bp.Professor)
+                .Where(b => b.Disciplina.Ano == ano && b.Disciplina.Semestre == semestre &&
+                            b.Disciplina.DisciplinaCursoProfessores.Any(dcp => dcp.CursoId == cursoId))
+                .Select(b => new BlocoHorarioVisualDto
+                {
+                    Id = b.Id,
+                    DiaSemana = b.DiaSemana,
+                    HoraInicio = b.HoraInicio.ToString(),
+                    HoraFim = b.HoraFim.ToString(),
+                    Disciplina = b.Disciplina.Nome,
+                    Sala = b.Sala.Nome,
+                    Professor = b.BlocosProfessor.Select(bp => bp.Professor.Nome).FirstOrDefault(),
+                    TipoAula = b.TipoAula.Tipo,
+                    Horas = b.HoraFim.Hour - b.HoraInicio.Hour
+                })
+                .ToListAsync();
 
-            if (blocoHorarioDto == null)
-            {
-                return NotFound();
-            }
-
-            return blocoHorarioDto;
+            return Ok(blocos);
         }
+
+
+
 
         // POST: api/BlocoHorarioAPI
         [HttpPost]
-        public async Task<IActionResult> PostBlocosHorario([FromBody] List<BlocoHorarioDto> blocosDto)
+        public async Task<ActionResult> PostBlocoHorario(BlocoHorarioDto dto)
         {
-            if (blocosDto == null || !blocosDto.Any())
-                return BadRequest("Nenhum bloco enviado.");
-
-            foreach (var dto in blocosDto)
+            // Cria o bloco
+            var bloco = new BlocoHorario
             {
-                // Cria o bloco de horário
-                var bloco = new BlocoHorario
-                {
-                    DiaSemana = dto.DiaSemana,
-                    HoraInicio = TimeOnly.Parse(dto.HoraInicio),
-                    HoraFim = TimeOnly.Parse(dto.HoraFim),
-                    DisciplinaId = dto.DisciplinaId,
-                    SalaId = dto.SalaId,
-                    TipoAulaId = dto.TipoAulaId,
-                    HorarioId = dto.HorarioId
-                };
+                DiaSemana = dto.DiaSemana,
+                HoraInicio = TimeOnly.Parse(dto.HoraInicio),
+                HoraFim = TimeOnly.Parse(dto.HoraFim),
+                DisciplinaId = dto.DisciplinaId,
+                SalaId = dto.SalaId,
+                TipoAulaId = dto.TipoAulaId,
+                HorarioId = dto.HorarioId
+            };
 
-                _context.BlocosHorario.Add(bloco);
-                await _context.SaveChangesAsync(); // bloco.Id é gerado aqui
+            _context.BlocosHorario.Add(bloco);
+            await _context.SaveChangesAsync(); // salva para gerar ID
 
-                // Cria associação com o professor
-                var blocoProfessor = new BlocoProfessor
-                {
-                    BlocoId = bloco.Id,
-                    ProfessorId = dto.ProfessorId
-                };
-
-                _context.BlocosProfessor.Add(blocoProfessor);
-                await _context.SaveChangesAsync();
-            }
-
-            return Ok("Blocos de horário criados com sucesso.");
-        }
-
-
-        // DELETE: api/BlocoHorarioAPI/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBlocoHorarioDto(int id)
-        {
-            var blocoHorarioDto = await _context.BlocoHorarioDto.FindAsync(id);
-            if (blocoHorarioDto == null)
+            // Cria a ligação com o professor
+            var blocoProfessor = new BlocoProfessor
             {
-                return NotFound();
-            }
+                BlocoHorarioId = bloco.Id,
+                ProfessorId = dto.ProfessorId
+            };
 
-            _context.BlocoHorarioDto.Remove(blocoHorarioDto);
+            _context.BlocosProfessor.Add(blocoProfessor);
             await _context.SaveChangesAsync();
 
-            return NoContent();
+            return CreatedAtAction(nameof(PostBlocoHorario), new { id = bloco.Id }, dto);
         }
+        
 
         
     }

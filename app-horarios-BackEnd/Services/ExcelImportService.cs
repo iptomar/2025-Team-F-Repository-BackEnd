@@ -393,7 +393,7 @@ namespace app_horarios_BackEnd.Services;
                         Nome = nomeDisciplina,
                         Plano = row["NM_PLANO"].ToString(),
                         Ano = Convert.ToInt32(row["ANO"]),
-                        Semestre = row["SEMESTRE"].ToString(),
+                        Semestre = Convert.ToInt32(row["SEMESTRE"]),
                         Tipo = row["TIPO"].ToString(),
                         HorasTeorica = Convert.ToInt32(row["HR_TEORICA"]),
                         HorasPratica = Convert.ToInt32(row["HR_PRATICA"]),

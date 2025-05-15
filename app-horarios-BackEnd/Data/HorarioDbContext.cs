@@ -36,16 +36,5 @@ public class HorarioDbContext : DbContext
 
         modelBuilder.Entity<Secretariado>().HasKey(s => s.IdUtilizador);
     }
-
-public DbSet<App_horarios_BackEnd.Models.DTO.LocalizacaoDto> LocalizacaoDto { get; set; } = default!;
-
-public DbSet<App_horarios_BackEnd.Models.DTO.EscolaDto> EscolaDto { get; set; } = default!;
-
-public DbSet<App_horarios_BackEnd.Models.DTO.SalaDto> SalaDto { get; set; } = default!;
-
-public DbSet<App_horarios_BackEnd.Models.DTO.CursoDto> CursoDto { get; set; } = default!;
-
-public DbSet<App_horarios_BackEnd.Models.DTO.TurmaDto> TurmaDto { get; set; } = default!;
-
-public DbSet<App_horarios_BackEnd.Models.DTO.BlocoHorarioDto> BlocoHorarioDto { get; set; } = default!;
+    
 }

@@ -18,4 +18,8 @@ public class BlocoHorario
 
     public int TipoAulaId { get; set; }
     public TipoAula TipoAula { get; set; }
+    
+    public ICollection<BlocoProfessor> BlocosProfessor { get; set; }
+    public ICollection<DisciplinaCursoProfessor> DisciplinaCursoProfessores { get; set; }
+
 }

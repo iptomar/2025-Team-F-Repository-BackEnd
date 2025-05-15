@@ -137,9 +137,6 @@ namespace app_horarios_BackEnd.Controllers.API
             return escola.Id;
         }
         
-        private bool CursoDtoExists(int id)
-        {
-            return _context.CursoDto.Any(e => e.Id == id);
-        }
+        
     }
 }

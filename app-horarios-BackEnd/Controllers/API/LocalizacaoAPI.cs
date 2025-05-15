@@ -97,9 +97,6 @@ namespace app_horarios_BackEnd.Controllers.API
         
         
 
-        private bool LocalizacaoDtoExists(int id)
-        {
-            return _context.LocalizacaoDto.Any(e => e.Id == id);
-        }
+        
     }
 }

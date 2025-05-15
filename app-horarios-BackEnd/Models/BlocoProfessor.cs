@@ -4,7 +4,7 @@ public class BlocoProfessor
 {
     public int Id { get; set; }
 
-    public int BlocoId { get; set; }
+    public int BlocoHorarioId { get; set; }
     public BlocoHorario BlocoHorario { get; set; }
 
     public int ProfessorId { get; set; }

@@ -7,7 +7,7 @@ public class Disciplina
 
     public string? Plano { get; set; }
     public int? Ano { get; set; }
-    public string? Semestre { get; set; }
+    public int? Semestre { get; set; }
     public string? Tipo { get; set; }
 
     public int? HorasTeorica { get; set; }
