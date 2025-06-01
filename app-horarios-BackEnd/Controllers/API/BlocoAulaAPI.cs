@@ -9,11 +9,11 @@ namespace app_horarios_BackEnd.Controllers.API
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class BlocoHorarioAPI : ControllerBase
+    public class BlocoAulaAPI : ControllerBase
     {
         private readonly HorarioDbContext _context;
 
-        public BlocoHorarioAPI(HorarioDbContext context)
+        public BlocoAulaAPI(HorarioDbContext context)
         {
             _context = context;
         }
@@ -21,7 +21,7 @@ namespace app_horarios_BackEnd.Controllers.API
        
 
         [HttpGet("por-curso/{cursoId}/ano/{ano}/semestre/{semestre}")]
-        public async Task<ActionResult<IEnumerable<BlocoPreviewDto>>> GetBlocosFiltrados(int cursoId, int ano, int semestre)
+        public async Task<ActionResult<IEnumerable<BlocoPreviewDto>>> GetBlocosFiltrados(int cursoId, int ano, string semestre)
         {
             var blocosQuery = await _context.BlocosAulas
                 .Include(b => b.Disciplina)
@@ -71,7 +71,7 @@ namespace app_horarios_BackEnd.Controllers.API
         
 
 
-        // POST: api/BlocoHorarioAPI
+        // POST: api/BlocoAulaAPI
         [HttpPost]
         public async Task<ActionResult> PostBlocoHorario(BlocoAulaDto dto)
         {

@@ -17,7 +17,6 @@ ViewData["Title"] = "Cursos";
         <tr>
             <th>@Html.DisplayNameFor(model => model.First().Nome)</th>
             <th>@Html.DisplayNameFor(model => model.First().Escola)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Ramo)</th>
             <th>@Html.DisplayNameFor(model => model.First().Grau)</th>
             <th class="text-center">Ações</th>
         </tr>
@@ -28,7 +27,6 @@ ViewData["Title"] = "Cursos";
         <tr>
             <td>@Html.DisplayFor(modelItem => item.Nome)</td>
             <td>@Html.DisplayFor(modelItem => item.Escola.Nome)</td>
-            <td>@Html.DisplayFor(modelItem => item.Ramo.Nome)</td>
             <td>@Html.DisplayFor(modelItem => item.Grau.Nome)</td>
             <td class="text-center">
                 <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning me-1">Editar</a>

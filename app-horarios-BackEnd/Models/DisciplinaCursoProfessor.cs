@@ -9,6 +9,10 @@ public class DisciplinaCursoProfessor
 
     public int CursoId { get; set; }
     public Curso Curso { get; set; }
+    
+    public int EscolaId { get; set; }
+    public Disciplina Escola { get; set; }
+
 
     public int? ProfessorId { get; set; }
     public Professor Professor { get; set; }

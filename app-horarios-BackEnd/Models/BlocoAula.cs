@@ -1,6 +1,6 @@
 namespace App_horarios_BackEnd.Models;
 
-public class BlocoHorario
+public class BlocoAula
 {
     public int Id { get; set; }
     public string DiaSemana { get; set; }
@@ -18,7 +18,6 @@ public class BlocoHorario
     public int TipoAulaId { get; set; }
     public TipoAula TipoAula { get; set; }
     
-    public ICollection<BlocoProfessor> BlocosProfessor { get; set; }
-    public ICollection<DisciplinaCursoProfessor> DisciplinaCursoProfessores { get; set; }
-
+    public int ProfessorId { get; set; }
+    public Professor Professor { get; set; }
 }

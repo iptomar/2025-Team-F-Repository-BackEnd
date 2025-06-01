@@ -22,7 +22,7 @@ namespace app_horarios_BackEnd.Controllers
         // GET: Curso
         public async Task<IActionResult> Index()
         {
-            var horarioDbContext = _context.Cursos.Include(c => c.Escola).Include(c => c.Grau).Include(c => c.Ramo);
+            var horarioDbContext = _context.Cursos.Include(c => c.Escola).Include(c => c.Grau);
             return View(await horarioDbContext.ToListAsync());
         }
 
@@ -37,7 +37,6 @@ namespace app_horarios_BackEnd.Controllers
             var curso = await _context.Cursos
                 .Include(c => c.Escola)
                 .Include(c => c.Grau)
-                .Include(c => c.Ramo)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (curso == null)
             {
@@ -52,7 +51,6 @@ namespace app_horarios_BackEnd.Controllers
         {
             ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Nome");
             ViewData["GrauId"] = new SelectList(_context.Graus, "Id", "Nome");
-            ViewData["RamoId"] = new SelectList(_context.Ramos, "Id", "Nome");
             return View();
         }
 
@@ -71,7 +69,6 @@ namespace app_horarios_BackEnd.Controllers
             }
             ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Nome", curso.EscolaId);
             ViewData["GrauId"] = new SelectList(_context.Graus, "Id", "Nome", curso.GrauId);
-            ViewData["RamoId"] = new SelectList(_context.Ramos, "Id", "Nome", curso.RamoId);
             return View(curso);
         }
 
@@ -90,7 +87,6 @@ namespace app_horarios_BackEnd.Controllers
             }
             ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Id", curso.EscolaId);
             ViewData["GrauId"] = new SelectList(_context.Graus, "Id", "Nome", curso.GrauId);
-            ViewData["RamoId"] = new SelectList(_context.Ramos, "Id", "Id", curso.RamoId);
             return View(curso);
         }
 
@@ -128,7 +124,6 @@ namespace app_horarios_BackEnd.Controllers
             }
             ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Id", curso.EscolaId);
             ViewData["GrauId"] = new SelectList(_context.Graus, "Id", "Nome", curso.GrauId);
-            ViewData["RamoId"] = new SelectList(_context.Ramos, "Id", "Id", curso.RamoId);
             return View(curso);
         }
 
@@ -143,7 +138,6 @@ namespace app_horarios_BackEnd.Controllers
             var curso = await _context.Cursos
                 .Include(c => c.Escola)
                 .Include(c => c.Grau)
-                .Include(c => c.Ramo)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (curso == null)
             {
