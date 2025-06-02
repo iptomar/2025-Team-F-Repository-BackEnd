@@ -1,0 +1,61 @@
+@model App_horarios_BackEnd.Models.BlocoAula
+
+@{
+    ViewData["Title"] = "Edit";
+}
+
+<h1>Edit</h1>
+
+<h4>BlocoAula</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group">
+                <label asp-for="DiaSemana" class="control-label"></label>
+                <input asp-for="DiaSemana" class="form-control" />
+                <span asp-validation-for="DiaSemana" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="Duracao" class="control-label"></label>
+                <input asp-for="Duracao" class="form-control" />
+                <span asp-validation-for="Duracao" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="HorarioId" class="control-label"></label>
+                <select asp-for="HorarioId" class="form-control" asp-items="ViewBag.HorarioId"></select>
+                <span asp-validation-for="HorarioId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="DisciplinaId" class="control-label"></label>
+                <select asp-for="DisciplinaId" class="form-control" asp-items="ViewBag.DisciplinaId"></select>
+                <span asp-validation-for="DisciplinaId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="SalaId" class="control-label"></label>
+                <select asp-for="SalaId" class="form-control" asp-items="ViewBag.SalaId"></select>
+                <span asp-validation-for="SalaId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="TipoAulaId" class="control-label"></label>
+                <select asp-for="TipoAulaId" class="form-control" asp-items="ViewBag.TipoAulaId"></select>
+                <span asp-validation-for="TipoAulaId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <label asp-for="ProfessorId" class="control-label"></label>
+                <select asp-for="ProfessorId" class="form-control" asp-items="ViewBag.ProfessorId"></select>
+                <span asp-validation-for="ProfessorId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
+
