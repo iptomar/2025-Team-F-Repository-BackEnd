@@ -33,9 +33,8 @@ namespace app_horarios_BackEnd.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Nome = table.Column<string>(type: "text", nullable: false),
                     Plano = table.Column<string>(type: "text", nullable: true),
-                    Grau = table.Column<string>(type: "text", nullable: true),
                     Ano = table.Column<int>(type: "integer", nullable: true),
-                    Semestre = table.Column<string>(type: "text", nullable: true),
+                    Semestre = table.Column<int>(type: "integer", nullable: true),
                     Tipo = table.Column<string>(type: "text", nullable: true),
                     HorasTeorica = table.Column<int>(type: "integer", nullable: true),
                     HorasPratica = table.Column<int>(type: "integer", nullable: true),
@@ -58,7 +57,8 @@ namespace app_horarios_BackEnd.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Nome = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false)
+                    Nome = table.Column<string>(type: "character varying(100)", maxLength: 100, nullable: false),
+                    Duracao = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -112,7 +112,7 @@ namespace app_horarios_BackEnd.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Nome = table.Column<string>(type: "text", nullable: false)
+                    Nome = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
                 {
@@ -174,7 +174,6 @@ namespace app_horarios_BackEnd.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Nome = table.Column<string>(type: "text", nullable: false),
-                    Tipo = table.Column<string>(type: "text", nullable: false),
                     EscolaId = table.Column<int>(type: "integer", nullable: false),
                     RamoId = table.Column<int>(type: "integer", nullable: true),
                     GrauId = table.Column<int>(type: "integer", nullable: false)
@@ -343,7 +342,7 @@ namespace app_horarios_BackEnd.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Nome = table.Column<string>(type: "text", nullable: false),
+                    Nome = table.Column<string>(type: "text", nullable: true),
                     NumeroAlunos = table.Column<int>(type: "integer", nullable: true),
                     Aberta = table.Column<bool>(type: "boolean", nullable: false),
                     CursoId = table.Column<int>(type: "integer", nullable: false)
@@ -365,7 +364,7 @@ namespace app_horarios_BackEnd.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Nome = table.Column<string>(type: "text", nullable: false),
+                    Nome = table.Column<string>(type: "text", nullable: true),
                     TemNEE = table.Column<bool>(type: "boolean", nullable: false),
                     TurmaId = table.Column<int>(type: "integer", nullable: false)
                 },
@@ -423,71 +422,50 @@ namespace app_horarios_BackEnd.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "BlocosHorario",
+                name: "BlocosAulas",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     DiaSemana = table.Column<string>(type: "text", nullable: false),
-                    HoraInicio = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
-                    HoraFim = table.Column<TimeOnly>(type: "time without time zone", nullable: false),
+                    Duracao = table.Column<int>(type: "integer", nullable: false),
                     HorarioId = table.Column<int>(type: "integer", nullable: false),
                     DisciplinaId = table.Column<int>(type: "integer", nullable: false),
                     SalaId = table.Column<int>(type: "integer", nullable: false),
-                    TipoAulaId = table.Column<int>(type: "integer", nullable: false)
+                    TipoAulaId = table.Column<int>(type: "integer", nullable: false),
+                    ProfessorId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_BlocosHorario", x => x.Id);
+                    table.PrimaryKey("PK_BlocosAulas", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_BlocosHorario_Disciplinas_DisciplinaId",
+                        name: "FK_BlocosAulas_Disciplinas_DisciplinaId",
                         column: x => x.DisciplinaId,
                         principalTable: "Disciplinas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BlocosHorario_Horarios_HorarioId",
+                        name: "FK_BlocosAulas_Horarios_HorarioId",
                         column: x => x.HorarioId,
                         principalTable: "Horarios",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BlocosHorario_Salas_SalaId",
+                        name: "FK_BlocosAulas_Professores_ProfessorId",
+                        column: x => x.ProfessorId,
+                        principalTable: "Professores",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_BlocosAulas_Salas_SalaId",
                         column: x => x.SalaId,
                         principalTable: "Salas",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_BlocosHorario_TiposAula_TipoAulaId",
+                        name: "FK_BlocosAulas_TiposAula_TipoAulaId",
                         column: x => x.TipoAulaId,
                         principalTable: "TiposAula",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "BlocosProfessor",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "integer", nullable: false)
-                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    BlocoId = table.Column<int>(type: "integer", nullable: false),
-                    BlocoHorarioId = table.Column<int>(type: "integer", nullable: false),
-                    ProfessorId = table.Column<int>(type: "integer", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_BlocosProfessor", x => x.Id);
-                    table.ForeignKey(
-                        name: "FK_BlocosProfessor_BlocosHorario_BlocoHorarioId",
-                        column: x => x.BlocoHorarioId,
-                        principalTable: "BlocosHorario",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_BlocosProfessor_Professores_ProfessorId",
-                        column: x => x.ProfessorId,
-                        principalTable: "Professores",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -498,34 +476,29 @@ namespace app_horarios_BackEnd.Migrations
                 column: "TurmaId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BlocosHorario_DisciplinaId",
-                table: "BlocosHorario",
+                name: "IX_BlocosAulas_DisciplinaId",
+                table: "BlocosAulas",
                 column: "DisciplinaId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BlocosHorario_HorarioId",
-                table: "BlocosHorario",
+                name: "IX_BlocosAulas_HorarioId",
+                table: "BlocosAulas",
                 column: "HorarioId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BlocosHorario_SalaId",
-                table: "BlocosHorario",
+                name: "IX_BlocosAulas_ProfessorId",
+                table: "BlocosAulas",
+                column: "ProfessorId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_BlocosAulas_SalaId",
+                table: "BlocosAulas",
                 column: "SalaId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_BlocosHorario_TipoAulaId",
-                table: "BlocosHorario",
+                name: "IX_BlocosAulas_TipoAulaId",
+                table: "BlocosAulas",
                 column: "TipoAulaId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BlocosProfessor_BlocoHorarioId",
-                table: "BlocosProfessor",
-                column: "BlocoHorarioId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_BlocosProfessor_ProfessorId",
-                table: "BlocosProfessor",
-                column: "ProfessorId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ComissoesCurso_CursoId",
@@ -627,7 +600,7 @@ namespace app_horarios_BackEnd.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
-                name: "BlocosProfessor");
+                name: "BlocosAulas");
 
             migrationBuilder.DropTable(
                 name: "ComissoesCurso");
@@ -645,18 +618,6 @@ namespace app_horarios_BackEnd.Migrations
                 name: "TransferenciasTurma");
 
             migrationBuilder.DropTable(
-                name: "BlocosHorario");
-
-            migrationBuilder.DropTable(
-                name: "Professores");
-
-            migrationBuilder.DropTable(
-                name: "Alunos");
-
-            migrationBuilder.DropTable(
-                name: "Disciplinas");
-
-            migrationBuilder.DropTable(
                 name: "Horarios");
 
             migrationBuilder.DropTable(
@@ -664,6 +625,15 @@ namespace app_horarios_BackEnd.Migrations
 
             migrationBuilder.DropTable(
                 name: "TiposAula");
+
+            migrationBuilder.DropTable(
+                name: "Disciplinas");
+
+            migrationBuilder.DropTable(
+                name: "Professores");
+
+            migrationBuilder.DropTable(
+                name: "Alunos");
 
             migrationBuilder.DropTable(
                 name: "CategoriasDocentes");

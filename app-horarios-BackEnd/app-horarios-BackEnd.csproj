@@ -26,4 +26,8 @@
     <PackageReference Include="System.Text.Encoding.CodePages" Version="9.0.3" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Controllers\API\" />
+  </ItemGroup>
+
 </Project>

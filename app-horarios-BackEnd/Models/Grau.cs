@@ -11,4 +11,7 @@ public class Grau
     [MaxLength(100)]
     public string Nome { get; set; }
     
+    public string Duracao { get; set; }
+    
+    
 }
