@@ -21,4 +21,4 @@ WORKDIR /app
 COPY --from=build /out .
 
 # Comando para iniciar a API
-ENTRYPOINT ["dotnet", "app-horarios-BackEnd.dll"]
+ENTRYPOINT ["dotnet", "app-horarios-BackEnd.dll"
