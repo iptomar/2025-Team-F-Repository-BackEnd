@@ -118,6 +118,7 @@ public class ExcelImportService
         {
             var row = table.Rows[i];
 
+            
             if (!int.TryParse(row["CD_GRAU"]?.ToString(), out int id))
                 continue;
 
