@@ -2,11 +2,13 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copia apenas a pasta do projeto backend
-COPY App-horarios-BackEnd/ ./App-horarios-BackEnd/
+# Copia TODO o conteúdo da pasta atual para dentro do container
+COPY . .
+
+# Entra no diretório correto
+WORKDIR /app/App-horarios-BackEnd
 
 # Restaura pacotes
-WORKDIR /app/App-horarios-BackEnd
 RUN dotnet restore "app-horarios-BackEnd.csproj"
 
 # Publica
