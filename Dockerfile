@@ -2,16 +2,16 @@
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /app
 
-# Copia TODO o conteúdo da pasta atual para dentro do container
+# Copia todos os arquivos para dentro do container
 COPY . .
 
-# Entra no diretório correto
+# Vai para a pasta correta com nome EXATO
 WORKDIR /app/App-horarios-BackEnd
 
-# Restaura pacotes
+# Restaura os pacotes do projeto
 RUN dotnet restore "app-horarios-BackEnd.csproj"
 
-# Publica
+# Publica a aplicação
 RUN dotnet publish "app-horarios-BackEnd.csproj" -c Release -o /out
 
 # Etapa 2 - Runtime
