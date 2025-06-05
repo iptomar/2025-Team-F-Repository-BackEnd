@@ -78,13 +78,16 @@ app.MapControllers();
 app.Urls.Add("http://*:8080");
 
 // Aplica migrations automaticamente ao iniciar
-using (var scope = app.Services.CreateScope())
+try
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<HorarioDbContext>();
-    dbContext.Database.Migrate(); // aplica migrations automaticamente
+    using var scope = app.Services.CreateScope();
+    var db = scope.ServiceProvider.GetRequiredService<HorarioDbContext>();
+    db.Database.Migrate();
 }
-
-
+catch (Exception ex)
+{
+    Console.WriteLine($"Erro ao aplicar migrations: {ex.Message}");
+}
 
 
 app.Run();
