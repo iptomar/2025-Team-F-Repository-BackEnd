@@ -4,14 +4,26 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+// Add services to the container
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("DevCors", policy =>
     {
-        policy.AllowAnyOrigin() // ⛔ Liberado só para desenvolvimento
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.AllowAnyOrigin()
+            .AllowAnyHeader()
+            .AllowAnyMethod();
+    });
+
+    options.AddPolicy("ProdCors", policy =>
+    {
+        policy.WithOrigins(
+                "https://teusite.onrender.com", // Coloca aqui o domínio real da aplicação frontend
+                "http://localhost:3000",
+                "http://localhost:3001"
+            )
+            .AllowAnyHeader()
+            .AllowAnyMethod();
     });
 });
 
@@ -23,7 +35,6 @@ builder.Services.AddControllersWithViews()
     });
 
 builder.Services.AddScoped<ExcelImportService>();
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddRazorPages();
@@ -34,37 +45,36 @@ builder.Services.AddDbContext<HorarioDbContext>(options =>
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
+// Configure the HTTP request pipeline
 
-// CORS deve ser configurado APENAS uma vez, dependendo do ambiente
 if (app.Environment.IsDevelopment())
 {
     app.UseCors("DevCors");
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 else
 {
-    // Em produção: usar CORS restrito
-    app.UseCors(policy =>
-        policy.WithOrigins("https://horarios.com") // ⚠️ Ajusta o domínio real
-              .AllowAnyHeader()
-              .AllowAnyMethod());
+    app.UseCors("ProdCors");
+    // app.UseHttpsRedirection(); // ativa se tiveres HTTPS configurado no Render
 }
 
-// app.UseHttpsRedirection(); // Habilita se tiver certificado HTTPS
+// Middleware comum
 app.UseStaticFiles();
 app.UseRouting();
-
-// ⚠️ Não repete app.UseCors() aqui
 app.UseAuthentication();
 app.UseAuthorization();
 app.UseSession();
 
+// Rotas
 app.MapRazorPages();
 
-// Configuração de rotas MVC
 app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Urls.Add("http://*:8080");
+
 
 app.MapControllers();
 

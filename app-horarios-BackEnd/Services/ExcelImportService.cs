@@ -47,6 +47,10 @@ public class ExcelImportService
                     await ImportGraus(table);
                     break;
                 
+                /*case "turma":
+                case "turma":
+                    await ImportTurmas(table);
+                    break;*/
 
                 case "categorias":
                 case "categoria":
@@ -75,6 +79,10 @@ public class ExcelImportService
                 case "cursos":
                     await ImportCursos(table);
                     break;
+                
+                case "ucs":
+                    await ImportDisciplinas(table);
+                    break;
 
                 case "secretariado":
                     await ImportSecretariado(table);
@@ -91,9 +99,7 @@ public class ExcelImportService
                     await ImportComissaoCurso(table);
                     break;
 
-                case "ucs":
-                    await ImportDisciplinas(table);
-                    break;
+                
 
                 default:
                     Console.WriteLine($"[IGNORADO] Folha não reconhecida: {table.TableName}");
@@ -126,7 +132,7 @@ public class ExcelImportService
                 continue;
 
             string nome = row["DS_GRAU"]?.ToString()?.Trim();
-            string duracao = row["duração"]?.ToString()?.Trim();
+            string duracao = row["duracao"]?.ToString()?.Trim();
 
             if (string.IsNullOrWhiteSpace(nome))
                 continue;
