@@ -27,19 +27,13 @@ namespace app_horarios_BackEnd.Controllers.API
         public async Task<ActionResult<IEnumerable<EscolaDto>>> GetEscolas()
         {
             var escolas = await _context.Escolas
-                .Include(e => e.Localizacao)
                 .Include(e => e.Cursos).ThenInclude(c => c.Grau)
                 .Include(e => e.Salas)
                 .Select(e => new EscolaDto
                 {
                     Id = e.Id,
                     Nome = e.Nome,
-                    Localizacao = new LocalizacaoDto
-                    {
-                        Id = e.Localizacao.Id,
-                        Nome = e.Localizacao.Nome,
-                        Abreviacao = e.Localizacao.Abreviacao
-                    },
+                    
                     Cursos = e.Cursos.Select(c => new CursoDto
                     {
                         Id = c.Id,
@@ -66,7 +60,6 @@ namespace app_horarios_BackEnd.Controllers.API
         public async Task<ActionResult<EscolaDto>> GetEscola(int id)
         {
             var escola = await _context.Escolas
-                .Include(e => e.Localizacao)
                 .Include(e => e.Cursos).ThenInclude(c => c.Grau)
                 .Include(e => e.Salas)
                 .FirstOrDefaultAsync(e => e.Id == id);
@@ -78,12 +71,7 @@ namespace app_horarios_BackEnd.Controllers.API
             {
                 Id = escola.Id,
                 Nome = escola.Nome,
-                Localizacao = new LocalizacaoDto
-                {
-                    Id = escola.Localizacao.Id,
-                    Nome = escola.Localizacao.Nome,
-                    Abreviacao = escola.Localizacao.Abreviacao
-                },
+                
                 Cursos = escola.Cursos.Select(c => new CursoDto
                 {
                     Id = c.Id,
@@ -111,7 +99,6 @@ namespace app_horarios_BackEnd.Controllers.API
             var escola = new Escola
             {
                 Nome = escolaDto.Nome,
-                LocalizacaoId = escolaDto.Localizacao.Id
             };
 
             _context.Escolas.Add(escola);
@@ -133,8 +120,7 @@ namespace app_horarios_BackEnd.Controllers.API
                 return NotFound();
 
             escola.Nome = escolaDto.Nome;
-            escola.LocalizacaoId = escolaDto.Localizacao.Id;
-
+            
             await _context.SaveChangesAsync();
             return NoContent();
         }

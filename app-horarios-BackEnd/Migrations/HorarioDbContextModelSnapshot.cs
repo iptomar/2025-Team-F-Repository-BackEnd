@@ -148,6 +148,9 @@ namespace app_horarios_BackEnd.Migrations
                     b.Property<int>("GrauId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("LocalizacaoId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Nome")
                         .IsRequired()
                         .HasColumnType("text");
@@ -157,6 +160,8 @@ namespace app_horarios_BackEnd.Migrations
                     b.HasIndex("EscolaId");
 
                     b.HasIndex("GrauId");
+
+                    b.HasIndex("LocalizacaoId");
 
                     b.ToTable("Cursos");
                 });
@@ -300,7 +305,7 @@ namespace app_horarios_BackEnd.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("LocalizacaoId")
+                    b.Property<int?>("LocalizacaoId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Nome")
@@ -643,9 +648,17 @@ namespace app_horarios_BackEnd.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("App_horarios_BackEnd.Models.Localizacao", "Localizacao")
+                        .WithMany()
+                        .HasForeignKey("LocalizacaoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.Navigation("Escola");
 
                     b.Navigation("Grau");
+
+                    b.Navigation("Localizacao");
                 });
 
             modelBuilder.Entity("App_horarios_BackEnd.Models.DiretorCurso", b =>
@@ -706,13 +719,9 @@ namespace app_horarios_BackEnd.Migrations
 
             modelBuilder.Entity("App_horarios_BackEnd.Models.Escola", b =>
                 {
-                    b.HasOne("App_horarios_BackEnd.Models.Localizacao", "Localizacao")
+                    b.HasOne("App_horarios_BackEnd.Models.Localizacao", null)
                         .WithMany("Escolas")
-                        .HasForeignKey("LocalizacaoId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Localizacao");
+                        .HasForeignKey("LocalizacaoId");
                 });
 
             modelBuilder.Entity("App_horarios_BackEnd.Models.Horario", b =>

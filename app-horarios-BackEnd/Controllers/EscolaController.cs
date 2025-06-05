@@ -22,7 +22,7 @@ namespace app_horarios_BackEnd.Controllers
         // GET: Escola
         public async Task<IActionResult> Index()
         {
-            var horarioDbContext = _context.Escolas.Include(e => e.Localizacao);
+            var horarioDbContext = _context.Escolas;
             return View(await horarioDbContext.ToListAsync());
         }
         
@@ -36,7 +36,6 @@ namespace app_horarios_BackEnd.Controllers
             }
 
             var escola = await _context.Escolas
-                .Include(e => e.Localizacao)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (escola == null)
             {
@@ -66,7 +65,6 @@ namespace app_horarios_BackEnd.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["LocalizacaoId"] = new SelectList(_context.Localizacoes, "Id", "Id", escola.LocalizacaoId);
             return View(escola);
         }
 
@@ -83,7 +81,6 @@ namespace app_horarios_BackEnd.Controllers
             {
                 return NotFound();
             }
-            ViewData["LocalizacaoId"] = new SelectList(_context.Localizacoes, "Id", "Id", escola.LocalizacaoId);
             return View(escola);
         }
 
@@ -119,7 +116,6 @@ namespace app_horarios_BackEnd.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["LocalizacaoId"] = new SelectList(_context.Localizacoes, "Id", "Id", escola.LocalizacaoId);
             return View(escola);
         }
 
@@ -132,7 +128,6 @@ namespace app_horarios_BackEnd.Controllers
             }
 
             var escola = await _context.Escolas
-                .Include(e => e.Localizacao)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (escola == null)
             {

@@ -16,8 +16,7 @@ ViewData["Title"] = "Escolas";
         <thead class="table-primary">
         <tr>
             <th>@Html.DisplayNameFor(model => model.First().Nome)</th>
-            <th>@Html.DisplayNameFor(model => model.First().Localizacao)</th>
-            <th class="text-center">Ações</th>
+             <th class="text-center">Ações</th>
         </tr>
         </thead>
         <tbody>
@@ -25,7 +24,6 @@ ViewData["Title"] = "Escolas";
         {
         <tr>
             <td>@Html.DisplayFor(modelItem => item.Nome)</td>
-            <td>@Html.DisplayFor(modelItem => item.Localizacao.Nome)</td>
             <td class="text-center">
                 <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning me-1">Editar</a>
                 <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info me-1">Detalhes</a>

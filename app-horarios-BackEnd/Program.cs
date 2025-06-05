@@ -73,9 +73,17 @@ app.MapControllerRoute(
     name: "default",
     pattern: "{controller=Home}/{action=Index}/{id?}");
 
+app.MapControllers();
+
 app.Urls.Add("http://*:8080");
 
+// Aplica migrations automaticamente ao iniciar
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<HorarioDbContext>();
+    dbContext.Database.Migrate();
+}
 
-app.MapControllers();
+
 
 app.Run();

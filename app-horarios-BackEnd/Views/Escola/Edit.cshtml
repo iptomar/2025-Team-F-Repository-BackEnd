@@ -20,14 +20,6 @@ ViewData["Title"] = "Editar Escola";
                 <span asp-validation-for="Nome" class="text-danger"></span>
             </div>
 
-            <div class="mb-3">
-                <label asp-for="LocalizacaoId" class="form-label"></label>
-                <select asp-for="LocalizacaoId" class="form-select" asp-items="ViewBag.LocalizacaoId">
-                    <option value="">-- Seleciona a Localização --</option>
-                </select>
-                <span asp-validation-for="LocalizacaoId" class="text-danger"></span>
-            </div>
-
             <button type="submit" class="btn btn-primary">Guardar</button>
             <a asp-action="Index" class="btn btn-secondary ms-2">Voltar à Lista</a>
         </form>
