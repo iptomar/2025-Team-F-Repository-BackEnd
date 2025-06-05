@@ -81,8 +81,9 @@ app.Urls.Add("http://*:8080");
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<HorarioDbContext>();
-    dbContext.Database.Migrate();
+    dbContext.Database.Migrate(); // aplica migrations automaticamente
 }
+
 
 
 
