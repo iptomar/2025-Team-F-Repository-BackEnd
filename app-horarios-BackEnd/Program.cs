@@ -2,6 +2,8 @@ using app_horarios_BackEnd.Data;
 using app_horarios_BackEnd.Services;
 using Microsoft.EntityFrameworkCore;
 
+
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
@@ -36,6 +38,8 @@ builder.Services.AddControllersWithViews()
 
 builder.Services.AddScoped<ExcelImportService>();
 builder.Services.AddEndpointsApiExplorer();
+
+
 builder.Services.AddSwaggerGen();
 builder.Services.AddRazorPages();
 builder.Services.AddSession();

@@ -12,8 +12,8 @@ public class Curso
     public int GrauId { get; set; }
     public Grau Grau { get; set; }
     
-    public int LocalizacaoId { get; set; }
-    public Localizacao Localizacao { get; set; }
+    public int? LocalizacaoId { get; set; }
+    public Localizacao? Localizacao { get; set; }
 
     public ICollection<Turma> Turmas { get; set; }
     public ICollection<DisciplinaCursoProfessor> DisciplinaCursoProfessor { get; set; }

@@ -27,6 +27,8 @@ public class HorarioDbContext : DbContext
     public DbSet<Secretariado> Secretariados { get; set; }
     public DbSet<ComissaoCurso> ComissoesCurso { get; set; }
     public DbSet<DiretorCurso> DiretoresCurso { get; set; }
+    public DbSet<Utilizador> Utilizadores { get; set; }
+
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

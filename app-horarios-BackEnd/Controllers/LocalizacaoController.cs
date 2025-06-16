@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using App_horarios_BackEnd.Models;
 using app_horarios_BackEnd.Data;
+using System.Globalization;
+using System.Text;
+
 
 namespace app_horarios_BackEnd.Controllers
 {
@@ -24,6 +27,35 @@ namespace app_horarios_BackEnd.Controllers
         {
             return View(await _context.Localizacoes.ToListAsync());
         }
+        
+        [HttpGet]
+        public async Task<IActionResult> Pesquisar(string? search)
+        {
+            var localizacoes = await _context.Localizacoes.ToListAsync();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                // Função local para normalizar (remover acentos e lowercase)
+                string Normalizar(string input) =>
+                    new string(input.Normalize(NormalizationForm.FormD)
+                            .Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                            .ToArray())
+                        .ToLower();
+
+                string searchNormalizado = Normalizar(search);
+
+                localizacoes = localizacoes
+                    .Where(l =>
+                        Normalizar(l.Nome).Contains(searchNormalizado) ||
+                        Normalizar(l.Abreviacao ?? "").Contains(searchNormalizado))
+                    .ToList();
+            }
+
+            ViewData["Search"] = search;
+            return View("Index", localizacoes);
+        }
+
+
 
         // GET: LocalizacaoController/Details/5
         public async Task<IActionResult> Details(int? id)
@@ -56,13 +88,20 @@ namespace app_horarios_BackEnd.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Nome,Abreviacao")] Localizacao localizacao)
         {
-            if (ModelState.IsValid)
-            {
-                _context.Add(localizacao);
-                await _context.SaveChangesAsync();
-                return RedirectToAction(nameof(Index));
+            if (!ModelState.IsValid) {
+                foreach (var state in ModelState) {
+                    foreach (var error in state.Value.Errors) {
+                        Console.WriteLine($"Key: {state.Key}, Error: {error.ErrorMessage}, Exceptoin: {error.Exception}");
+                    }
+                }
+                return View(localizacao);
             }
-            return View(localizacao);
+
+            _context.Add(localizacao);
+            await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Criada sucesso!";
+            return RedirectToAction(nameof(Index));
+            
         }
 
         // GET: LocalizacaoController/Edit/5
@@ -99,6 +138,8 @@ namespace app_horarios_BackEnd.Controllers
                 {
                     _context.Update(localizacao);
                     await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Localidade atualizada com sucesso!";
+                    return RedirectToAction(nameof(Index));
                 }
                 catch (DbUpdateConcurrencyException)
                 {

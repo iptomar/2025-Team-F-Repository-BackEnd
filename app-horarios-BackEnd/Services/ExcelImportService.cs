@@ -31,26 +31,17 @@ public class ExcelImportService
         };
 
         var dataSet = reader.AsDataSet(conf);
-
+        
         foreach (DataTable table in dataSet.Tables)
         {
             string sheetName = table.TableName.Trim().ToLower();
 
             switch (sheetName)
             {
-                case "salas":
-                    await ImportSalas(table);
-                    break;
-
                 case "grau":
                 case "graus":
                     await ImportGraus(table);
                     break;
-                
-                /*case "turma":
-                case "turma":
-                    await ImportTurmas(table);
-                    break;*/
 
                 case "categorias":
                 case "categoria":
@@ -58,14 +49,17 @@ public class ExcelImportService
                     await ImportCategoriasDocentes(table);
                     break;
 
-
                 case "unidade_departamental":
                 case "unidades":
                 case "ud":
                 case "unidadesdepartamentais":
                     await ImportUnidadesDepartamentais(table);
                     break;
-                
+
+                case "salas":
+                    await ImportSalas(table);
+                    break;
+
                 case "docentes":
                 case "professores":
                     await ImportProfessores(table);
@@ -75,15 +69,27 @@ public class ExcelImportService
                 case "tiposaula":
                     await ImportTipoAula(table);
                     break;
-                
+
                 case "cursos":
                     await ImportCursos(table);
                     break;
+
+            }
+        }
+
+        await _context.SaveChangesAsync(); // Grava base de dados principal
+
+        foreach (DataTable table in dataSet.Tables)
+        {
+            string sheetName = table.TableName.Trim().ToLower();
+
+            switch (sheetName)
+            {
                 
                 case "ucs":
                     await ImportDisciplinas(table);
                     break;
-
+                
                 case "secretariado":
                     await ImportSecretariado(table);
                     break;
@@ -98,19 +104,13 @@ public class ExcelImportService
                 case "ccc":
                     await ImportComissaoCurso(table);
                     break;
-
-                
-
-                default:
-                    Console.WriteLine($"[IGNORADO] Folha não reconhecida: {table.TableName}");
-                    break;
             }
         }
 
-        await _context.SaveChangesAsync();
+        await _context.SaveChangesAsync(); // Grava os relacionamentos
+        
     }
-
-
+    
     private async Task ImportGraus(DataTable table)
     {
         var grausExistentes = await _context.Graus
@@ -339,6 +339,15 @@ public class ExcelImportService
                 .ToListAsync()
         );
 
+        var cursosExistentes = await _context.Cursos
+            .AsNoTracking()
+            .Select(c => new { c.Id, c.EscolaId })
+            .ToListAsync();
+
+        var cursoSet = new HashSet<(int cursoId, int escolaId)>(
+            cursosExistentes.Select(c => (c.Id, c.EscolaId))
+        );
+
         for (int i = 0; i < table.Rows.Count; i++)
         {
             var row = table.Rows[i];
@@ -358,6 +367,13 @@ public class ExcelImportService
             if (!int.TryParse(row["cod_curso"]?.ToString(), out int cursoId))
                 continue;
 
+            // ✅ VERIFICAÇÃO IMPORTANTE
+            if (!cursoSet.Contains((cursoId, escolaId)))
+            {
+                Console.WriteLine($"[ERRO] Curso não encontrado: CursoId={cursoId}, EscolaId={escolaId}. Ignorado.");
+                continue;
+            }
+
             var secretariado = new Secretariado
             {
                 IdUtilizador = idUtilizador,
@@ -373,6 +389,7 @@ public class ExcelImportService
 
         await _context.SaveChangesAsync();
     }
+
 
 
     private async Task ImportCategoriasDocentes(DataTable table)

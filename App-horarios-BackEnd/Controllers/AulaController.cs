@@ -79,6 +79,7 @@ namespace app_horarios_BackEnd.Controllers
             ViewData["SalaId"] = new SelectList(_context.Salas, "Id", "Id", blocoAula.SalaId);
             ViewData["TipoAulaId"] = new SelectList(_context.TiposAula, "Id", "Id", blocoAula.TipoAulaId);
             return View(blocoAula);
+            
         }
 
         // GET: AulaController/Edit/5
