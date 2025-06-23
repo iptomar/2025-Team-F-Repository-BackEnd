@@ -5,6 +5,9 @@ public class HorarioDTO
     public int Id { get; set; }
     public int TurmaId { get; set; }
     
+    
     public List<BlocoHorarioDTO> BlocosHorarios { get; set; }
+    
+    
 
 }
