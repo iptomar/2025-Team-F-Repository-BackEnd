@@ -10,6 +10,7 @@ WORKDIR /app/App-horarios-BackEnd
 
 # Restaura e publica
 RUN dotnet restore "App-horarios-BackEnd.csproj"
+
 RUN dotnet publish "App-horarios-BackEnd.csproj" -c Release -o /out
 
 # Etapa 2 - Runtime
