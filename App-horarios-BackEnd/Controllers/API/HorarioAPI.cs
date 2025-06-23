@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using App_horarios_BackEnd.Models.DTO;
+using App_horarios_BackEnd.Models;
 using app_horarios_BackEnd.Data;
 
 namespace app_horarios_BackEnd.Controllers.API
@@ -23,36 +23,36 @@ namespace app_horarios_BackEnd.Controllers.API
 
         // GET: api/HorarioAPI
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<HorarioDTO>>> GetHorarioDTO()
+        public async Task<ActionResult<IEnumerable<Horario>>> GetHorarios()
         {
-            return await _context.HorarioDTO.ToListAsync();
+            return await _context.Horarios.ToListAsync();
         }
 
         // GET: api/HorarioAPI/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<HorarioDTO>> GetHorarioDTO(int id)
+        public async Task<ActionResult<Horario>> GetHorario(int id)
         {
-            var horarioDTO = await _context.HorarioDTO.FindAsync(id);
+            var horario = await _context.Horarios.FindAsync(id);
 
-            if (horarioDTO == null)
+            if (horario == null)
             {
                 return NotFound();
             }
 
-            return horarioDTO;
+            return horario;
         }
 
         // PUT: api/HorarioAPI/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutHorarioDTO(int id, HorarioDTO horarioDTO)
+        public async Task<IActionResult> PutHorario(int id, Horario horario)
         {
-            if (id != horarioDTO.Id)
+            if (id != horario.Id)
             {
                 return BadRequest();
             }
 
-            _context.Entry(horarioDTO).State = EntityState.Modified;
+            _context.Entry(horario).State = EntityState.Modified;
 
             try
             {
@@ -60,7 +60,7 @@ namespace app_horarios_BackEnd.Controllers.API
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!HorarioDTOExists(id))
+                if (!HorarioExists(id))
                 {
                     return NotFound();
                 }
@@ -76,33 +76,33 @@ namespace app_horarios_BackEnd.Controllers.API
         // POST: api/HorarioAPI
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<HorarioDTO>> PostHorarioDTO(HorarioDTO horarioDTO)
+        public async Task<ActionResult<Horario>> PostHorario(Horario horario)
         {
-            _context.HorarioDTO.Add(horarioDTO);
+            _context.Horarios.Add(horario);
             await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetHorarioDTO", new { id = horarioDTO.Id }, horarioDTO);
+            return CreatedAtAction("GetHorario", new { id = horario.Id }, horario);
         }
 
         // DELETE: api/HorarioAPI/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteHorarioDTO(int id)
+        public async Task<IActionResult> DeleteHorario(int id)
         {
-            var horarioDTO = await _context.HorarioDTO.FindAsync(id);
-            if (horarioDTO == null)
+            var horario = await _context.Horarios.FindAsync(id);
+            if (horario == null)
             {
                 return NotFound();
             }
 
-            _context.HorarioDTO.Remove(horarioDTO);
+            _context.Horarios.Remove(horario);
             await _context.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool HorarioDTOExists(int id)
+        private bool HorarioExists(int id)
         {
-            return _context.HorarioDTO.Any(e => e.Id == id);
+            return _context.Horarios.Any(e => e.Id == id);
         }
     }
 }
