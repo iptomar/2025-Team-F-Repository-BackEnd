@@ -5,7 +5,7 @@ services:
     plan: free
     autoDeploy: true
     branch: main
-    rootDir: app-horarios-BackEnd
+    rootDir: App-horarios-BackEnd
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
