@@ -6,15 +6,17 @@ WORKDIR /app
 COPY . .
 
 # Entra no diretório do projeto
-WORKDIR /app/app-horarios-BackEnd
+WORKDIR /app/App_horarios_BackEnd
 
 # Restaura e publica
-RUN dotnet restore "app-horarios-BackEnd.csproj"
-RUN dotnet publish "app-horarios-BackEnd.csproj" -c Release -o /out
+
+RUN dotnet restore "App_horarios_BackEnd.csproj"
+RUN dotnet publish "App_horarios_BackEnd.csproj" -c Release -o /out
+
 
 # Etapa 2 - Runtime
 FROM mcr.microsoft.com/dotnet/aspnet:8.0
 WORKDIR /app
 COPY --from=build /out .
 
-ENTRYPOINT ["dotnet", "app-horarios-BackEnd.dll"]
+ENTRYPOINT ["dotnet", "App-horarios-BackEnd.dll"]
