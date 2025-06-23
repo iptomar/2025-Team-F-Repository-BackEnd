@@ -1,60 +1,59 @@
 @model App_horarios_BackEnd.Models.BlocoAula
 
 @{
-    ViewData["Title"] = "Details";
+ViewData["Title"] = "Detalhes do Bloco de Aula";
 }
 
-<h1>Details</h1>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-title fw-bold mb-0">Detalhes do Bloco de Aula</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar à Lista
+        </a>
+    </div>
 
-<div>
-    <h4>BlocoAula</h4>
-    <hr />
-    <dl class="row">
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.DiaSemana)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.DiaSemana)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Duracao)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Duracao)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Horario)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Horario.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Disciplina)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Disciplina.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Sala)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Sala.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.TipoAula)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.TipoAula.Id)
-        </dd>
-        <dt class = "col-sm-2">
-            @Html.DisplayNameFor(model => model.Professor)
-        </dt>
-        <dd class = "col-sm-10">
-            @Html.DisplayFor(model => model.Professor.Id)
-        </dd>
-    </dl>
-</div>
-<div>
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
-    <a asp-action="Index">Back to List</a>
+    <div class="card shadow-sm p-4 rounded bg-white border mb-4">
+        <dl class="row mb-0">
+            <dt class="col-sm-4 fw-semibold text-muted">
+                Duração (minutos)
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.Duracao)
+            </dd>
+
+            <dt class="col-sm-4 fw-semibold text-muted">
+                Disciplina
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.Disciplina.Nome)
+            </dd>
+
+            <dt class="col-sm-4 fw-semibold text-muted">
+                Sala
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.Sala.Nome)
+            </dd>
+
+            <dt class="col-sm-4 fw-semibold text-muted">
+                Tipo de Aula
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.TipoAula.Tipo)
+            </dd>
+
+            <dt class="col-sm-4 fw-semibold text-muted">
+                Professor
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.Professor.Nome)
+            </dd>
+        </dl>
+    </div>
+
+    <div class="d-flex">
+        <a asp-action="Edit" asp-route-id="@Model?.Id" class="btn btn-ipt me-2">
+            <i class="bi bi-pencil-square"></i> Editar
+        </a>
+    </div>
 </div>

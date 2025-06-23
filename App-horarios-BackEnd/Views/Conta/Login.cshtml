@@ -1,0 +1,60 @@
+@{
+ViewData["Title"] = "Login";
+}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+
+<div class="d-flex justify-content-center align-items-center vh-100">
+    <div class="card shadow rounded-4 p-4" style="width: 100%; max-width: 400px;">
+        <div class="card-header text-white text-center fw-bold rounded-top-4" style="background-color: #78be20;">
+            Acesso ao Sistema
+        </div>
+
+        <div class="card-body">
+            <form asp-action="Login" method="post">
+                @if (ViewData["Erro"] != null)
+                {
+                <div class="alert alert-danger">@ViewData["Erro"]</div>
+                }
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label class="form-label" for="email">Email</label>
+                    <div class="input-group">
+                        <input id="email" name="email" type="email" class="form-control" placeholder="seuemail@ipt.pt" required />
+                        <span class="input-group-text"><i class="fas fa-envelope"></i></span>
+                    </div>
+                </div>
+
+                <!-- Senha -->
+                <div class="mb-3">
+                    <label class="form-label" for="password">Senha</label>
+                    <div class="input-group">
+                        <input id="password" name="password" type="password" class="form-control" placeholder="Digite sua senha" required />
+                        <span class="input-group-text password-toggle"><i class="fas fa-eye"></i></span>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-ipt text-white w-100">
+                    <i class="fas fa-sign-in-alt me-1"></i> Entrar
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+<script>
+    document.querySelector('.password-toggle i').addEventListener('click', function () {
+        const input = document.getElementById('password');
+        if (input.type === 'password') {
+            input.type = 'text';
+            this.classList.remove('fa-eye');
+            this.classList.add('fa-eye-slash');
+        } else {
+            input.type = 'password';
+            this.classList.remove('fa-eye-slash');
+            this.classList.add('fa-eye');
+        }
+    });
+</script>
+}

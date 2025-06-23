@@ -4,48 +4,67 @@
 ViewData["Title"] = "Editar Sala";
 }
 
-<h1>Editar Sala</h1>
-<hr />
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-title fw-bold mb-0">Editar Sala</h2>
+        <a asp-action="Index" class="btn btn-outline-secondary">
+            <i class="bi bi-arrow-left"></i> Voltar à Lista
+        </a>
+    </div>
 
-<div class="row">
-    <div class="col-md-6">
-        <form asp-action="Edit" method="post">
-            <div asp-validation-summary="All" class="alert alert-danger"></div>
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Edit" method="post" class="shadow-sm p-4 rounded bg-white border">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-            <input type="hidden" asp-for="Id" />
+                <input type="hidden" asp-for="Id" />
 
-            <div class="mb-3">
-                <label asp-for="Nome" class="form-label"></label>
-                <input asp-for="Nome" class="form-control" />
-                <span asp-validation-for="Nome" class="text-danger"></span>
-            </div>
+                <!-- Nome -->
+                <div class="mb-3">
+                    <label asp-for="Nome" class="form-label fw-semibold">Nome</label>
+                    <input asp-for="Nome" class="form-control" placeholder="Ex: Sala B1" />
+                    <span asp-validation-for="Nome" class="text-danger small"></span>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="Capacidade" class="form-label"></label>
-                <input asp-for="Capacidade" class="form-control" />
-                <span asp-validation-for="Capacidade" class="text-danger"></span>
-            </div>
+                <!-- Capacidade -->
+                <div class="mb-3">
+                    <label asp-for="Capacidade" class="form-label fw-semibold">Capacidade</label>
+                    <input asp-for="Capacidade" class="form-control" placeholder="Ex: 30" />
+                    <span asp-validation-for="Capacidade" class="text-danger small"></span>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="Tipo" class="form-label"></label>
-                <input asp-for="Tipo" class="form-control" />
-                <span asp-validation-for="Tipo" class="text-danger"></span>
-            </div>
+                <!-- Tipo -->
+                <div class="mb-3">
+                    <label asp-for="TipoAulaId" class="form-label fw-semibold">Tipo</label>
+                    <select asp-for="TipoAulaId" class="form-select" asp-items="ViewBag.TipoAulaId">
+                        <option value="">-- Seleciona a Escola --</option>
+                    </select>
+                    <span asp-validation-for="TipoAulaId" class="text-danger small"></span>
+                </div>
 
-            <div class="mb-3">
-                <label asp-for="EscolaId" class="form-label"></label>
-                <select asp-for="EscolaId" class="form-select" asp-items="ViewBag.EscolaId">
-                    <option value="">-- Seleciona a Escola --</option>
-                </select>
-                <span asp-validation-for="EscolaId" class="text-danger"></span>
-            </div>
+                <!-- Escola -->
+                <div class="mb-3">
+                    <label asp-for="EscolaId" class="form-label fw-semibold">Escola</label>
+                    <select asp-for="EscolaId" class="form-select" asp-items="ViewBag.EscolaId">
+                        <option value="">-- Seleciona a Escola --</option>
+                    </select>
+                    <span asp-validation-for="EscolaId" class="text-danger small"></span>
+                </div>
 
-            <button type="submit" class="btn btn-primary">Guardar</button>
-            <a asp-action="Index" class="btn btn-secondary ms-2">Voltar à Lista</a>
-        </form>
+                <!-- Botões -->
+                <div class="d-flex justify-content-start">
+                    <button type="submit" class="btn btn-ipt me-2">
+                        <i class="bi bi-check-circle"></i> Guardar
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
 @section Scripts {
-@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+@{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
 }

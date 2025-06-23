@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -22,7 +24,7 @@ namespace app_horarios_BackEnd.Controllers
         // GET: AulaController
         public async Task<IActionResult> Index()
         {
-            var horarioDbContext = _context.BlocosAulas.Include(b => b.Disciplina).Include(b => b.Horario).Include(b => b.Professor).Include(b => b.Sala).Include(b => b.TipoAula);
+            var horarioDbContext = _context.BlocosAulas.Include(b => b.Disciplina).Include(b => b.Professor).Include(b => b.Sala).Include(b => b.TipoAula);
             return View(await horarioDbContext.ToListAsync());
         }
 
@@ -36,7 +38,6 @@ namespace app_horarios_BackEnd.Controllers
 
             var blocoAula = await _context.BlocosAulas
                 .Include(b => b.Disciplina)
-                .Include(b => b.Horario)
                 .Include(b => b.Professor)
                 .Include(b => b.Sala)
                 .Include(b => b.TipoAula)
@@ -52,11 +53,10 @@ namespace app_horarios_BackEnd.Controllers
         // GET: AulaController/Create
         public IActionResult Create()
         {
-            ViewData["DisciplinaId"] = new SelectList(_context.Disciplinas, "Id", "Id");
-            ViewData["HorarioId"] = new SelectList(_context.Horarios, "Id", "Id");
-            ViewData["ProfessorId"] = new SelectList(_context.Professores, "Id", "Id");
-            ViewData["SalaId"] = new SelectList(_context.Salas, "Id", "Id");
-            ViewData["TipoAulaId"] = new SelectList(_context.TiposAula, "Id", "Id");
+            ViewData["DisciplinaId"] = new SelectList(_context.Disciplinas, "Id", "Nome");
+            ViewData["ProfessorId"] = new SelectList(_context.Professores, "Id", "Nome");
+            ViewData["SalaId"] = new SelectList(_context.Salas, "Id", "Nome");
+            ViewData["TipoAulaId"] = new SelectList(_context.TiposAula, "Id", "Tipo");
             return View();
         }
 
@@ -65,19 +65,19 @@ namespace app_horarios_BackEnd.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,DiaSemana,Duracao,HorarioId,DisciplinaId,SalaId,TipoAulaId,ProfessorId")] BlocoAula blocoAula)
+        public async Task<IActionResult> Create([Bind("Id,Duracao,DisciplinaId,SalaId,TipoAulaId,ProfessorId")] BlocoAula blocoAula)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 _context.Add(blocoAula);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Aula criado com sucesso!";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DisciplinaId"] = new SelectList(_context.Disciplinas, "Id", "Id", blocoAula.DisciplinaId);
-            ViewData["HorarioId"] = new SelectList(_context.Horarios, "Id", "Id", blocoAula.HorarioId);
-            ViewData["ProfessorId"] = new SelectList(_context.Professores, "Id", "Id", blocoAula.ProfessorId);
-            ViewData["SalaId"] = new SelectList(_context.Salas, "Id", "Id", blocoAula.SalaId);
-            ViewData["TipoAulaId"] = new SelectList(_context.TiposAula, "Id", "Id", blocoAula.TipoAulaId);
+            ViewData["DisciplinaId"] = new SelectList(_context.Disciplinas, "Id", "Nome", blocoAula.DisciplinaId);
+            ViewData["ProfessorId"] = new SelectList(_context.Professores, "Id", "Nome", blocoAula.ProfessorId);
+            ViewData["SalaId"] = new SelectList(_context.Salas, "Id", "Nome", blocoAula.SalaId);
+            ViewData["TipoAulaId"] = new SelectList(_context.TiposAula, "Id", "Tipo", blocoAula.TipoAulaId);
             return View(blocoAula);
             
         }
@@ -95,11 +95,10 @@ namespace app_horarios_BackEnd.Controllers
             {
                 return NotFound();
             }
-            ViewData["DisciplinaId"] = new SelectList(_context.Disciplinas, "Id", "Id", blocoAula.DisciplinaId);
-            ViewData["HorarioId"] = new SelectList(_context.Horarios, "Id", "Id", blocoAula.HorarioId);
-            ViewData["ProfessorId"] = new SelectList(_context.Professores, "Id", "Id", blocoAula.ProfessorId);
-            ViewData["SalaId"] = new SelectList(_context.Salas, "Id", "Id", blocoAula.SalaId);
-            ViewData["TipoAulaId"] = new SelectList(_context.TiposAula, "Id", "Id", blocoAula.TipoAulaId);
+            ViewData["DisciplinaId"] = new SelectList(_context.Disciplinas, "Id", "Nome", blocoAula.DisciplinaId);
+            ViewData["ProfessorId"] = new SelectList(_context.Professores, "Id", "Nome", blocoAula.ProfessorId);
+            ViewData["SalaId"] = new SelectList(_context.Salas, "Id", "Nome", blocoAula.SalaId);
+            ViewData["TipoAulaId"] = new SelectList(_context.TiposAula, "Id", "Tipo", blocoAula.TipoAulaId);
             return View(blocoAula);
         }
 
@@ -115,12 +114,14 @@ namespace app_horarios_BackEnd.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 try
                 {
                     _context.Update(blocoAula);
                     await _context.SaveChangesAsync();
+                    TempData["SuccessMessage"] = "Aula atualizada com sucesso.";
+
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -135,11 +136,10 @@ namespace app_horarios_BackEnd.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["DisciplinaId"] = new SelectList(_context.Disciplinas, "Id", "Id", blocoAula.DisciplinaId);
-            ViewData["HorarioId"] = new SelectList(_context.Horarios, "Id", "Id", blocoAula.HorarioId);
-            ViewData["ProfessorId"] = new SelectList(_context.Professores, "Id", "Id", blocoAula.ProfessorId);
-            ViewData["SalaId"] = new SelectList(_context.Salas, "Id", "Id", blocoAula.SalaId);
-            ViewData["TipoAulaId"] = new SelectList(_context.TiposAula, "Id", "Id", blocoAula.TipoAulaId);
+            ViewData["DisciplinaId"] = new SelectList(_context.Disciplinas, "Id", "Nome", blocoAula.DisciplinaId);
+            ViewData["ProfessorId"] = new SelectList(_context.Professores, "Id", "Nome", blocoAula.ProfessorId);
+            ViewData["SalaId"] = new SelectList(_context.Salas, "Id", "Nome", blocoAula.SalaId);
+            ViewData["TipoAulaId"] = new SelectList(_context.TiposAula, "Id", "Tipo", blocoAula.TipoAulaId);
             return View(blocoAula);
         }
 
@@ -153,7 +153,6 @@ namespace app_horarios_BackEnd.Controllers
 
             var blocoAula = await _context.BlocosAulas
                 .Include(b => b.Disciplina)
-                .Include(b => b.Horario)
                 .Include(b => b.Professor)
                 .Include(b => b.Sala)
                 .Include(b => b.TipoAula)
@@ -178,9 +177,42 @@ namespace app_horarios_BackEnd.Controllers
             }
 
             await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Aula eliminada com sucesso.";
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Pesquisar(string? search)
+        {
+            var blocos = await _context.BlocosAulas
+                .Include(b => b.Disciplina)
+                .Include(b => b.Professor)
+                .Include(b => b.Sala)
+                .Include(b => b.TipoAula)
+                .ToListAsync();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                string Normalizar(string input) =>
+                    new string(input.Normalize(NormalizationForm.FormD)
+                        .Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                        .ToArray()).ToLower();
+
+                string termo = Normalizar(search);
+
+                blocos = blocos
+                    .Where(b =>
+                        Normalizar(b.Disciplina?.Nome ?? "").Contains(termo) ||
+                        Normalizar(b.Professor?.Nome ?? "").Contains(termo) ||
+                        Normalizar(b.Sala?.Nome ?? "").Contains(termo) ||
+                        Normalizar(b.TipoAula?.Tipo ?? "").Contains(termo) ||
+                        b.Duracao.ToString().Contains(termo))
+                    .ToList();
+            }
+
+            ViewData["Search"] = search;
+            return View("Index", blocos);
+        }
         private bool BlocoAulaExists(int id)
         {
             return _context.BlocosAulas.Any(e => e.Id == id);

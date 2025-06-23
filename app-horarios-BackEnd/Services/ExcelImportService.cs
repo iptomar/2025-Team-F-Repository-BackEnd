@@ -185,7 +185,13 @@ public class ExcelImportService
         }
 
         await _context.SaveChangesAsync();
+
+        // Corrige a sequência de ID após inserções manuais
+        await _context.Database.ExecuteSqlRawAsync(@"
+        SELECT setval(pg_get_serial_sequence('""UnidadesDepartamentais""', 'Id'), 
+        (SELECT MAX(""Id"") FROM ""UnidadesDepartamentais"") + 1, false);");
     }
+
 
     private async Task ImportCursos(DataTable table)
     {
@@ -296,7 +302,7 @@ public class ExcelImportService
 
             string nome = row[0]?.ToString()?.Trim();
             bool parsedCapacidade = int.TryParse(row[1]?.ToString(), out int capacidade);
-            string tipo = row[2]?.ToString()?.Trim();
+            bool parsedTipoAula= int.TryParse(row[2]?.ToString()?.Trim(), out int tipoId);
             bool parsedEscola = int.TryParse(row[3]?.ToString(), out int escolaId);
 
             if (string.IsNullOrEmpty(nome) || !parsedEscola)
@@ -316,7 +322,7 @@ public class ExcelImportService
                     {
                         Nome = nome,
                         Capacidade = parsedCapacidade ? capacidade : 0,
-                        Tipo = tipo,
+                        TipoAulaId = tipoId,
                         EscolaId = escolaId
                     };
 
@@ -553,7 +559,7 @@ public class ExcelImportService
     {
         var disciplinasExistentes = await _context.Disciplinas
             .AsNoTracking()
-            .ToDictionaryAsync(d => d.DisciplinaId); // CD_DISCIP
+            .ToDictionaryAsync(d => d.Id); // CD_DISCIP
 
         var cursosExistentes = await _context.Cursos
             .AsNoTracking()
@@ -585,12 +591,8 @@ public class ExcelImportService
             {
                 var disciplina = new Disciplina
                 {
-                    DisciplinaId = disciplinaId,
+                    Id = disciplinaId,
                     Nome = nome,
-                    Plano = row["NM_PLANO"]?.ToString(),
-                    PlanoId = int.TryParse(row["CD_PLANO"]?.ToString(), out int planoId) ? planoId : null,
-                    Ramo = row["NM_RAMO"]?.ToString(),
-                    RamoId = int.TryParse(row["CD_RAMO"]?.ToString(), out int ramoId) ? ramoId : null,
                     Ano = int.TryParse(row["ANO"]?.ToString(), out int ano) ? ano : null,
                     Semestre = row["SEMESTRE"]?.ToString(),
                     Tipo = row["TIPO"]?.ToString(),

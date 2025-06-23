@@ -1,0 +1,109 @@
+@model App_horarios_BackEnd.Models.Disciplina
+@{
+ViewData["Title"] = "Editar Disciplina";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-title fw-bold mb-0">Editar Disciplina</h2>
+    </div>
+
+    <form asp-action="Edit" method="post" class="shadow-sm p-4 rounded bg-white border">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <input type="hidden" asp-for="Id" />
+
+        <!-- Nome -->
+        <div class="mb-3">
+            <label asp-for="Nome" class="form-label fw-semibold">Nome</label>
+            <input asp-for="Nome" class="form-control" required />
+            <span asp-validation-for="Nome" class="text-danger small"></span>
+        </div>
+
+        <!-- Escola e Curso -->
+        <div class="row mb-3">
+            <div class="col-md-6">
+                <label asp-for="EscolaId" class="form-label fw-semibold">Escola</label>
+                <select asp-for="EscolaId" class="form-select" asp-items="ViewBag.EscolaId">
+                    <option value="">-- Selecionar Escola --</option>
+                </select>
+                <span asp-validation-for="EscolaId" class="text-danger small"></span>
+            </div>
+            <div class="col-md-6">
+                <label asp-for="CursoId" class="form-label fw-semibold">Curso</label>
+                <select asp-for="CursoId" class="form-select" asp-items="ViewBag.CursoId">
+                    <option value="">-- Selecionar Curso --</option>
+                </select>
+                <span asp-validation-for="CursoId" class="text-danger small"></span>
+            </div>
+        </div>
+
+        <!-- Ano, Semestre, Tipo -->
+        <div class="row mb-3">
+            <div class="col-md-4">
+                <label asp-for="Ano" class="form-label fw-semibold">Ano</label>
+                <input asp-for="Ano" class="form-control" />
+                <span asp-validation-for="Ano" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Semestre" class="form-label fw-semibold">Semestre</label>
+                <input asp-for="Semestre" class="form-control" />
+                <span asp-validation-for="Semestre" class="text-danger small"></span>
+            </div>
+            <div class="col-md-4">
+                <label asp-for="Tipo" class="form-label fw-semibold">Tipo</label>
+                <input asp-for="Tipo" class="form-control" />
+                <span asp-validation-for="Tipo" class="text-danger small"></span>
+            </div>
+        </div>
+
+        <!-- Horas em grelha 3 colunas -->
+        <div class="row row-cols-1 row-cols-md-3 g-3 mb-3">
+            <div>
+                <label asp-for="HorasTeorica" class="form-label">Horas Teórica</label>
+                <input asp-for="HorasTeorica" class="form-control" />
+            </div>
+            <div>
+                <label asp-for="HorasPratica" class="form-label">Horas Prática</label>
+                <input asp-for="HorasPratica" class="form-control" />
+            </div>
+            <div>
+                <label asp-for="HorasTp" class="form-label">Horas TP</label>
+                <input asp-for="HorasTp" class="form-control" />
+            </div>
+            <div>
+                <label asp-for="HorasSeminario" class="form-label">Horas Seminário</label>
+                <input asp-for="HorasSeminario" class="form-control" />
+            </div>
+            <div>
+                <label asp-for="HorasLaboratorio" class="form-label">Horas Laboratório</label>
+                <input asp-for="HorasLaboratorio" class="form-control" />
+            </div>
+            <div>
+                <label asp-for="HorasCampo" class="form-label">Horas Campo</label>
+                <input asp-for="HorasCampo" class="form-control" />
+            </div>
+            <div>
+                <label asp-for="HorasOrientacao" class="form-label">Horas Orientação</label>
+                <input asp-for="HorasOrientacao" class="form-control" />
+            </div>
+            <div>
+                <label asp-for="HorasEstagio" class="form-label">Horas Estágio</label>
+                <input asp-for="HorasEstagio" class="form-control" />
+            </div>
+            <div>
+                <label asp-for="HorasOutras" class="form-label">Horas Outras</label>
+                <input asp-for="HorasOutras" class="form-control" />
+            </div>
+        </div>
+
+        <!-- Botões -->
+        <div class="d-flex justify-content-start">
+            <button type="submit" class="btn btn-ipt me-2">
+                <i class="bi bi-check-circle"></i> Guardar
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle"></i> Cancelar
+            </a>
+        </div>
+    </form>
+</div>

@@ -6,7 +6,5 @@ public class BlocoPreviewDto
     public string TipoAula { get; set; }
     public string NomeProfessor { get; set; } // Agora é uma lista
     public string NomeSala { get; set; }
-    
-    public string DiaSemana { get; set; }
     public int Duracao { get; set; }
 }

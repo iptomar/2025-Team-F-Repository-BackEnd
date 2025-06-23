@@ -1,38 +1,64 @@
 @model App_horarios_BackEnd.Models.Secretariado
 
 @{
-    ViewData["Title"] = "Edit";
+ViewData["Title"] = "Editar Secretariado";
 }
 
-<h1>Edit</h1>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-title fw-bold mb-0">Editar Secretariado</h2>
+    </div>
 
-<h4>Secretariado</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="IdUtilizador" />
-            <div class="form-group">
-                <label asp-for="Nome" class="control-label"></label>
-                <input asp-for="Nome" class="form-control" />
-                <span asp-validation-for="Nome" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Email" class="control-label"></label>
-                <input asp-for="Email" class="form-control" />
-                <span asp-validation-for="Email" class="text-danger"></span>
-            </div>
-            <input type="hidden" asp-for="EscolaId" />
-            <input type="hidden" asp-for="CursoId" />
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Edit" method="post" class="shadow-sm p-4 rounded bg-white border">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                <!-- ID Oculto -->
+                <input type="hidden" asp-for="IdUtilizador" />
+
+                <!-- Nome -->
+                <div class="mb-3">
+                    <label asp-for="Nome" class="form-label fw-semibold">Nome</label>
+                    <input asp-for="Nome" class="form-control" placeholder="Nome do secretariado" required />
+                    <span asp-validation-for="Nome" class="text-danger small"></span>
+                </div>
+
+                <!-- Email -->
+                <div class="mb-3">
+                    <label asp-for="Email" class="form-label fw-semibold">Email</label>
+                    <input asp-for="Email" class="form-control" placeholder="Email institucional" required />
+                    <span asp-validation-for="Email" class="text-danger small"></span>
+                </div>
+
+                <!-- Escola -->
+                <div class="mb-3">
+                    <label asp-for="EscolaId" class="form-label fw-semibold">Escola</label>
+                    <select asp-for="EscolaId" class="form-select" asp-items="ViewBag.EscolaId" required></select>
+                    <span asp-validation-for="EscolaId" class="text-danger small"></span>
+                </div>
+
+                <!-- Curso -->
+                <div class="mb-3">
+                    <label asp-for="CursoId" class="form-label fw-semibold">Curso</label>
+                    <select asp-for="CursoId" class="form-select" asp-items="ViewBag.CursoId" required></select>
+                    <span asp-validation-for="CursoId" class="text-danger small"></span>
+                </div>
+
+                <!-- Botões -->
+                <div class="d-flex justify-content-start">
+                    <button type="submit" class="btn btn-ipt me-2">
+                        <i class="bi bi-check-circle"></i> Guardar
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
     </div>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
+@section Scripts {
+@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

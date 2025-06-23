@@ -33,7 +33,7 @@ namespace app_horarios_BackEnd.Controllers.API
                     Id = s.Id,
                     Nome = s.Nome,
                     Capacidade = s.Capacidade,
-                    Tipo = s.Tipo,
+                    Tipo = s.TipoAula.Tipo,
                     NomeEscola = s.Escola.Nome
                 })
                 .ToListAsync();
@@ -55,7 +55,7 @@ namespace app_horarios_BackEnd.Controllers.API
                 Id = sala.Id,
                 Nome = sala.Nome,
                 Capacidade = sala.Capacidade,
-                Tipo = sala.Tipo,
+                Tipo = sala.TipoAula.Tipo,
                 NomeEscola = sala.Escola.Nome
             };
         }
@@ -69,7 +69,7 @@ namespace app_horarios_BackEnd.Controllers.API
             var sala = new Sala
             {
                 Nome = dto.Nome,
-                Tipo = dto.Tipo,
+                TipoAulaId = dto.Id,
                 Capacidade = dto.Capacidade,
                 EscolaId = escola.Id
             };
@@ -91,7 +91,7 @@ namespace app_horarios_BackEnd.Controllers.API
             if (escola == null) return BadRequest("Escola não encontrada.");
 
             sala.Nome = dto.Nome;
-            sala.Tipo = dto.Tipo;
+            sala.TipoAulaId = dto.Id;
             sala.Capacidade = dto.Capacidade;
             sala.EscolaId = escola.Id;
 

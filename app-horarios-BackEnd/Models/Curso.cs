@@ -2,10 +2,10 @@ namespace App_horarios_BackEnd.Models;
 
 public class Curso
 {
-    public int Id { get; set; } // Parte 1 da PK
+    public int Id { get; set; } 
     public string Nome { get; set; }
     
-    public int EscolaId { get; set; } // Parte 2 da PK
+    public int EscolaId { get; set; } 
     public Escola Escola { get; set; }
     
     

@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -54,12 +56,13 @@ namespace app_horarios_BackEnd.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome")] UnidadeDepartamental unidadeDepartamental)
+        public async Task<IActionResult> Create([Bind("Nome")] UnidadeDepartamental unidadeDepartamental)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(unidadeDepartamental);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Unidade Departamental criada com sucesso!";
                 return RedirectToAction(nameof(Index));
             }
             return View(unidadeDepartamental);
@@ -111,6 +114,7 @@ namespace app_horarios_BackEnd.Controllers
                         throw;
                     }
                 }
+                TempData["SuccessMessage"] = "Unidade Departamental atualizada com sucesso!";
                 return RedirectToAction(nameof(Index));
             }
             return View(unidadeDepartamental);
@@ -146,9 +150,38 @@ namespace app_horarios_BackEnd.Controllers
             }
 
             await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Unidade Departamental removido com sucesso.";
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Pesquisar(string? search)
+        {
+            var unidades = await _context.UnidadesDepartamentais.ToListAsync();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                string Normalizar(string input) =>
+                    new string(input.Normalize(NormalizationForm.FormD)
+                            .Where(c => CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                            .ToArray())
+                        .ToLower();
+
+                string searchNormalizado = Normalizar(search);
+
+                unidades = unidades
+                    .Where(u =>
+                        u.Id.ToString().Contains(searchNormalizado) || // ID como string
+                        Normalizar(u.Nome).Contains(searchNormalizado))
+                    .ToList();
+            }
+
+            ViewData["Search"] = search;
+            return View("Index", unidades);
+        }
+
+
+        
         private bool UnidadeDepartamentalExists(int id)
         {
             return _context.UnidadesDepartamentais.Any(e => e.Id == id);

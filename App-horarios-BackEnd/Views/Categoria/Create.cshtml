@@ -1,0 +1,41 @@
+@model App_horarios_BackEnd.Models.CategoriaDocente
+
+@{
+ViewData["Title"] = "Criar Categoria Docente";
+}
+
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-title fw-bold mb-0">Criar Nova Categoria</h2>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <form asp-action="Create" method="post" class="shadow-sm p-4 rounded bg-white border">
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+                
+
+                <!-- Nome -->
+                <div class="mb-3">
+                    <label asp-for="Nome" class="form-label fw-semibold">Nome da Categoria</label>
+                    <input asp-for="Nome" class="form-control" placeholder="Ex: Professor Auxiliar" required />
+                    <span asp-validation-for="Nome" class="text-danger small"></span>
+                </div>
+
+                <!-- Botões -->
+                <div class="d-flex justify-content-start">
+                    <button type="submit" class="btn btn-ipt me-2">
+                        <i class="bi bi-check-circle"></i> Criar
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i> Cancelar
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

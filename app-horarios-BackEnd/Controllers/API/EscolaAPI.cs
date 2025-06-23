@@ -46,7 +46,7 @@ namespace app_horarios_BackEnd.Controllers.API
                         Id = s.Id,
                         Nome = s.Nome,
                         Capacidade = s.Capacidade,
-                        Tipo = s.Tipo,
+                        Tipo = s.TipoAula.Tipo,
                         NomeEscola = e.Nome
                     }).ToList()
                 })
@@ -83,7 +83,7 @@ namespace app_horarios_BackEnd.Controllers.API
                 {
                     Id = s.Id,
                     Nome = s.Nome,
-                    Tipo = s.Tipo,
+                    Tipo = s.TipoAula.Tipo,
                     Capacidade = s.Capacidade,
                     NomeEscola = escola.Nome
                 }).ToList()

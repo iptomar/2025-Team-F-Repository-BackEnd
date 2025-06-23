@@ -34,41 +34,85 @@ public class HorarioDbContext : DbContext
     {
         base.OnModelCreating(modelBuilder);
 
+        // PK simples
+        modelBuilder.Entity<Curso>()
+            .HasKey(c => c.Id); // apenas o Id
+        
+        modelBuilder.Entity<Curso>()
+            .Property(c => c.Id)
+            .ValueGeneratedOnAdd(); // permite geração automática, mas aceita valores se fornecidos
+        
+        // Secretariado
         modelBuilder.Entity<Secretariado>()
-            .HasKey(s => new { s.IdUtilizador, s.CursoId, s.EscolaId });
+            .HasKey(s => s.IdUtilizador);
 
         modelBuilder.Entity<Secretariado>()
             .HasOne(s => s.Curso)
             .WithMany()
-            .HasForeignKey(s => new { s.CursoId, s.EscolaId });
+            .HasForeignKey(s => s.CursoId); // apenas CursoId
 
-        
-        modelBuilder.Entity<Curso>()
-            .HasKey(c => new { c.Id, c.EscolaId });
-        
-        // PK composta para DisciplinaCursoProfessor
+        // PK para DisciplinaCursoProfessor
         modelBuilder.Entity<DisciplinaCursoProfessor>()
-            .HasKey(dcp => new { dcp.CursoId, dcp.EscolaId, dcp.DisciplinaId });
+            .HasKey(dcp => new { dcp.CursoId, dcp.DisciplinaId });
 
-        // Relação com Curso (chave composta)
         modelBuilder.Entity<DisciplinaCursoProfessor>()
             .HasOne(dcp => dcp.Curso)
             .WithMany()
-            .HasForeignKey(dcp => new { dcp.CursoId, dcp.EscolaId });
+            .HasForeignKey(dcp => dcp.CursoId); // apenas CursoId
 
-        // Relação com Disciplina
         modelBuilder.Entity<DisciplinaCursoProfessor>()
             .HasOne(dcp => dcp.Disciplina)
             .WithMany(d => d.DisciplinaCursoProfessores)
             .HasForeignKey(dcp => dcp.DisciplinaId);
 
-        // Relação com Professor (opcional)
         modelBuilder.Entity<DisciplinaCursoProfessor>()
             .HasOne(dcp => dcp.Professor)
             .WithMany()
             .HasForeignKey(dcp => dcp.ProfessorId);
+        
+        
+        //ComissaoCurso
+        modelBuilder.Entity<ComissaoCurso>()
+            .HasKey(cc => new { cc.IdUtilizador, cc.CursoId, cc.EscolaId });
 
+        modelBuilder.Entity<ComissaoCurso>()
+            .HasOne(cc => cc.Secretariado)
+            .WithMany()
+            .HasForeignKey(cc => cc.IdUtilizador);
 
+        modelBuilder.Entity<ComissaoCurso>()
+            .HasOne(cc => cc.Curso)
+            .WithMany()
+            .HasForeignKey(cc => cc.CursoId);
+
+        modelBuilder.Entity<ComissaoCurso>()
+            .HasOne(cc => cc.Escola)
+            .WithMany()
+            .HasForeignKey(cc => cc.EscolaId);
+        
+        //DiretorCurso
+        modelBuilder.Entity<DiretorCurso>()
+            .HasKey(dc => new { dc.IdUtilizador, dc.CursoId, dc.EscolaId });
+
+        modelBuilder.Entity<DiretorCurso>()
+            .HasOne(dc => dc.Secretariado)
+            .WithMany()
+            .HasForeignKey(dc => dc.IdUtilizador);
+
+        modelBuilder.Entity<DiretorCurso>()
+            .HasOne(dc => dc.Curso)
+            .WithMany()
+            .HasForeignKey(dc => dc.CursoId);
+
+        modelBuilder.Entity<DiretorCurso>()
+            .HasOne(dc => dc.Escola)
+            .WithMany()
+            .HasForeignKey(dc => dc.EscolaId);
     }
+
+public DbSet<App_horarios_BackEnd.Models.DTO.BlocoHorarioDTO> BlocoHorarioDTO { get; set; } = default!;
+
+public DbSet<App_horarios_BackEnd.Models.DTO.HorarioDTO> HorarioDTO { get; set; } = default!;
+
     
 }

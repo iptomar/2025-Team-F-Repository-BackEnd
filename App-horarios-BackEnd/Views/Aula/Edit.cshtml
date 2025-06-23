@@ -1,61 +1,73 @@
 @model App_horarios_BackEnd.Models.BlocoAula
 
 @{
-    ViewData["Title"] = "Edit";
+ViewData["Title"] = "Editar Bloco de Aula";
 }
 
-<h1>Edit</h1>
-
-<h4>BlocoAula</h4>
-<hr />
-<div class="row">
-    <div class="col-md-4">
-        <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="DiaSemana" class="control-label"></label>
-                <input asp-for="DiaSemana" class="form-control" />
-                <span asp-validation-for="DiaSemana" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Duracao" class="control-label"></label>
-                <input asp-for="Duracao" class="form-control" />
-                <span asp-validation-for="Duracao" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="HorarioId" class="control-label"></label>
-                <select asp-for="HorarioId" class="form-control" asp-items="ViewBag.HorarioId"></select>
-                <span asp-validation-for="HorarioId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DisciplinaId" class="control-label"></label>
-                <select asp-for="DisciplinaId" class="form-control" asp-items="ViewBag.DisciplinaId"></select>
-                <span asp-validation-for="DisciplinaId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="SalaId" class="control-label"></label>
-                <select asp-for="SalaId" class="form-control" asp-items="ViewBag.SalaId"></select>
-                <span asp-validation-for="SalaId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="TipoAulaId" class="control-label"></label>
-                <select asp-for="TipoAulaId" class="form-control" asp-items="ViewBag.TipoAulaId"></select>
-                <span asp-validation-for="TipoAulaId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="ProfessorId" class="control-label"></label>
-                <select asp-for="ProfessorId" class="form-control" asp-items="ViewBag.ProfessorId"></select>
-                <span asp-validation-for="ProfessorId" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Save" class="btn btn-primary" />
-            </div>
-        </form>
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-title fw-bold mb-0">Editar Aula</h2>
     </div>
+
+    <form asp-action="Edit" method="post" class="shadow-sm p-4 rounded bg-white border">
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+        <input type="hidden" asp-for="Id" />
+
+        <!-- Duração -->
+        <div class="mb-3">
+            <label asp-for="Duracao" class="form-label fw-semibold">Duração (min)</label>
+            <input asp-for="Duracao" class="form-control" required />
+            <span asp-validation-for="Duracao" class="text-danger small"></span>
+        </div>
+
+        <!-- Disciplina -->
+        <div class="mb-3">
+            <label asp-for="DisciplinaId" class="form-label fw-semibold">Disciplina</label>
+            <select asp-for="DisciplinaId" class="form-select" asp-items="ViewBag.DisciplinaId" required>
+                <option value="">-- Selecionar Disciplina --</option>
+            </select>
+            <span asp-validation-for="DisciplinaId" class="text-danger small"></span>
+        </div>
+
+        <!-- Sala -->
+        <div class="mb-3">
+            <label asp-for="SalaId" class="form-label fw-semibold">Sala</label>
+            <select asp-for="SalaId" class="form-select" asp-items="ViewBag.SalaId" required>
+                <option value="">-- Selecionar Sala --</option>
+            </select>
+            <span asp-validation-for="SalaId" class="text-danger small"></span>
+        </div>
+
+        <!-- Tipo de Aula -->
+        <div class="mb-3">
+            <label asp-for="TipoAulaId" class="form-label fw-semibold">Tipo de Aula</label>
+            <select asp-for="TipoAulaId" class="form-select" asp-items="ViewBag.TipoAulaId" required>
+                <option value="">-- Selecionar Tipo de Aula --</option>
+            </select>
+            <span asp-validation-for="TipoAulaId" class="text-danger small"></span>
+        </div>
+
+        <!-- Professor -->
+        <div class="mb-3">
+            <label asp-for="ProfessorId" class="form-label fw-semibold">Professor</label>
+            <select asp-for="ProfessorId" class="form-select" asp-items="ViewBag.ProfessorId" required>
+                <option value="">-- Selecionar Professor --</option>
+            </select>
+            <span asp-validation-for="ProfessorId" class="text-danger small"></span>
+        </div>
+
+        <!-- Botões -->
+        <div class="mt-4 d-flex justify-content-start">
+            <button type="submit" class="btn btn-ipt me-2">
+                <i class="bi bi-check-circle"></i> Guardar
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle"></i> Cancelar
+            </a>
+        </div>
+    </form>
 </div>
 
-<div>
-    <a asp-action="Index">Back to List</a>
-</div>
-
+@section Scripts {
+@{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

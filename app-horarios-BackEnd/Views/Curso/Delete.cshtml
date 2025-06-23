@@ -1,44 +1,64 @@
 @model App_horarios_BackEnd.Models.Curso
 
 @{
-ViewData["Title"] = "Eliminar Curso";
+    ViewData["Title"] = "Eliminar Curso";
 }
 
-<h1>Eliminar Curso</h1>
-<hr />
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="text-title fw-bold mb-0 text-danger">Eliminar Curso</h2>
+    </div>
 
-<div class="alert alert-warning" role="alert">
-    <h5 class="mb-3">Tens a certeza que queres eliminar este curso?</h5>
+    <div class="alert alert-warning border border-danger mb-4">
+        <strong>Tem a certeza que deseja eliminar este curso?</strong>
+        <br />
+        Esta ação é irreversível.
+    </div>
 
-    <div class="card shadow-sm p-4 bg-white rounded">
-        <dl class="row">
-            <dt class="col-sm-3">
+    <div class="card shadow-sm p-4 rounded bg-white border mb-4">
+        <dl class="row mb-0">
+            <dt class="col-sm-3 fw-semibold text-muted">
                 @Html.DisplayNameFor(model => model.Nome)
             </dt>
             <dd class="col-sm-9">
                 @Html.DisplayFor(model => model.Nome)
             </dd>
 
-            <dt class="col-sm-3">
-                @Html.DisplayNameFor(model => model.Escola)
-            </dt>
-            <dd class="col-sm-9">
-                @Html.DisplayFor(model => model.Escola.Nome)
-            </dd>
-
-            
-            <dt class="col-sm-3">
-                @Html.DisplayNameFor(model => model.Grau)
+            <dt class="col-sm-3 fw-semibold text-muted">
+                Grau
             </dt>
             <dd class="col-sm-9">
                 @Html.DisplayFor(model => model.Grau.Nome)
             </dd>
+            
+            <dt class="col-sm-3 fw-semibold text-muted">
+                Escola
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Escola.Nome)
+            </dd>
+            
+
+            <dt class="col-sm-3 fw-semibold text-muted">
+                Localidade
+            </dt>
+            <dd class="col-sm-9">
+                @Html.DisplayFor(model => model.Localizacao.Nome)
+            </dd>
         </dl>
     </div>
 
-    <form asp-action="Delete" method="post" class="mt-4">
+    <form asp-action="Delete" method="post">
         <input type="hidden" asp-for="Id" />
-        <button type="submit" class="btn btn-danger me-2">Eliminar</button>
-        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+        <input type="hidden" asp-for="EscolaId" />
+
+        <div class="d-flex">
+            <button type="submit" class="btn btn-danger me-2">
+                <i class="bi bi-trash-fill"></i> Eliminar
+            </button>
+            <a asp-action="Index" class="btn btn-outline-secondary">
+                <i class="bi bi-x-circle"></i> Cancelar
+            </a>
+        </div>
     </form>
 </div>

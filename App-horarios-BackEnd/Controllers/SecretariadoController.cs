@@ -49,8 +49,9 @@ namespace app_horarios_BackEnd.Controllers
         // GET: Secretariado/Create
         public IActionResult Create()
         {
-            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Id");
-            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Id");
+            
+            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Nome");
+            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Nome");
             return View();
         }
 
@@ -61,14 +62,17 @@ namespace app_horarios_BackEnd.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("IdUtilizador,Nome,Email,EscolaId,CursoId")] Secretariado secretariado)
         {
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 _context.Add(secretariado);
                 await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Membro criada com sucesso!";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Id", secretariado.CursoId);
-            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Id", secretariado.EscolaId);
+            
+            // Repopular os dropdowns em caso de erro
+            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Nome", secretariado.CursoId);
+            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Nome", secretariado.EscolaId);
             return View(secretariado);
         }
 
@@ -85,8 +89,8 @@ namespace app_horarios_BackEnd.Controllers
             {
                 return NotFound();
             }
-            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Id", secretariado.CursoId);
-            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Id", secretariado.EscolaId);
+            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Nome", secretariado.CursoId);
+            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Nome", secretariado.EscolaId);
             return View(secretariado);
         }
 
@@ -102,7 +106,7 @@ namespace app_horarios_BackEnd.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 try
                 {
@@ -120,10 +124,11 @@ namespace app_horarios_BackEnd.Controllers
                         throw;
                     }
                 }
+                TempData["SuccessMessage"] = "Membro atualizado com sucesso!";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Id", secretariado.CursoId);
-            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Id", secretariado.EscolaId);
+            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Nome", secretariado.CursoId);
+            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Nome", secretariado.EscolaId);
             return View(secretariado);
         }
 
@@ -159,9 +164,33 @@ namespace app_horarios_BackEnd.Controllers
             }
 
             await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Membro removido com sucesso.";
             return RedirectToAction(nameof(Index));
         }
 
+        public async Task<IActionResult> Pesquisar(string search)
+        {
+            var query = _context.Secretariados
+                .Include(s => s.Escola)
+                .Include(s => s.Curso)
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                query = query.Where(s =>
+                    s.Nome.Contains(search) ||
+                    s.Email.Contains(search) ||
+                    s.Escola.Nome.Contains(search) ||
+                    s.Curso.Nome.Contains(search) ||
+                    s.IdUtilizador.ToString().Contains(search));
+            }
+
+            ViewData["Search"] = search;
+            var resultados = await query.ToListAsync();
+            return View("Index", resultados);
+        }
+
+        
         private bool SecretariadoExists(int id)
         {
             return _context.Secretariados.Any(e => e.IdUtilizador == id);

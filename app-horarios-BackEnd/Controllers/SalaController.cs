@@ -18,7 +18,9 @@ namespace app_horarios_BackEnd.Controllers
         // GET: SalaController
         public async Task<IActionResult> Index()
         {
-            var horarioDbContext = _context.Salas.Include(s => s.Escola);
+            var horarioDbContext = _context.Salas
+                .Include(s => s.Escola)
+                .Include(s => s.TipoAula);
             return View(await horarioDbContext.ToListAsync());
         }
 
@@ -32,6 +34,7 @@ namespace app_horarios_BackEnd.Controllers
 
             var sala = await _context.Salas
                 .Include(s => s.Escola)
+                .Include(s => s.TipoAula) // Adicionado para incluir o tipo de aula
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (sala == null)
             {
@@ -45,38 +48,43 @@ namespace app_horarios_BackEnd.Controllers
         public IActionResult Create()
         {
             ViewBag.EscolaId = new SelectList(_context.Escolas, "Id", "Nome");
+            ViewBag.TipoAulaId = new SelectList(_context.TiposAula, "Id", "Tipo");
             return View();
-
         }
+
 
         // POST: SalaController/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Capacidade,Tipo,EscolaId")] Sala sala)
+        public async Task<IActionResult> Create([Bind("Id,Nome,Capacidade,TipoAulaId,EscolaId")] Sala sala)
         {
             var salaJson = System.Text.Json.JsonSerializer.Serialize(sala);
             Console.WriteLine($"POST payload: {salaJson}");
 
-            if (!ModelState.IsValid)
+            if (ModelState.IsValid)
             {
-                // Recupera a escola associada, se EscolaId for válido
+                // Verificações adicionais
                 sala.Escola = await _context.Escolas.FindAsync(sala.EscolaId);
+                sala.TipoAula = await _context.TiposAula.FindAsync(sala.TipoAulaId);
 
-                // Validação adicional se necessário
                 if (sala.Escola == null)
-                {
                     ModelState.AddModelError(string.Empty, "A escola selecionada não é válida.");
-                }
 
-                // Recarrega o dropdown de escolas com seleção atual
+                if (sala.TipoAula == null)
+                    ModelState.AddModelError(string.Empty, "O tipo de aula selecionado não é válido.");
+
+                // Recarrega os dropdowns com a seleção atual
                 ViewBag.EscolaId = new SelectList(_context.Escolas, "Id", "Nome", sala.EscolaId);
+                ViewBag.TipoAulaId = new SelectList(_context.TiposAula, "Id", "Tipo", sala.TipoAulaId);
+
                 return View(sala);
             }
 
             _context.Add(sala);
             await _context.SaveChangesAsync();
+
             TempData["SuccessMessage"] = "Sala criada com sucesso!";
             return RedirectToAction(nameof(Index));
         }
@@ -96,7 +104,8 @@ namespace app_horarios_BackEnd.Controllers
             {
                 return NotFound();
             }
-            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Id", sala.EscolaId);
+            ViewBag.EscolaId = new SelectList(_context.Escolas, "Id", "Nome", sala.EscolaId);
+            ViewBag.TipoAulaId = new SelectList(_context.TiposAula, "Id", "Tipo", sala.TipoAulaId);
             return View(sala);
         }
 
@@ -105,14 +114,14 @@ namespace app_horarios_BackEnd.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Capacidade,Tipo,EscolaId")] Sala sala)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,Capacidade,TipoAulaId,EscolaId")] Sala sala)
         {
             if (id != sala.Id)
             {
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 try
                 {
@@ -130,9 +139,14 @@ namespace app_horarios_BackEnd.Controllers
                         throw;
                     }
                 }
+                TempData["SuccessMessage"] = "Sala atualizada com sucesso!";
                 return RedirectToAction(nameof(Index));
             }
-            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Id", sala.EscolaId);
+
+            // Recarrega dropdowns se a model for inválida
+            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Nome", sala.EscolaId);
+            ViewData["TipoAulaId"] = new SelectList(_context.TiposAula, "Id", "Tipo", sala.TipoAulaId);
+
             return View(sala);
         }
 
@@ -145,8 +159,9 @@ namespace app_horarios_BackEnd.Controllers
             }
 
             var sala = await _context.Salas
-                .Include(s => s.Escola)
-                .FirstOrDefaultAsync(m => m.Id == id);
+                    .Include(s => s.Escola)
+                    .Include(s => s.TipoAula)
+                    .FirstOrDefaultAsync(m => m.Id == id);
             if (sala == null)
             {
                 return NotFound();
@@ -167,8 +182,40 @@ namespace app_horarios_BackEnd.Controllers
             }
 
             await _context.SaveChangesAsync();
+            TempData["SuccessMessage"] = "Sala removido com sucesso.";
             return RedirectToAction(nameof(Index));
         }
+        
+
+        // GET: Sala/Pesquisar?search=Laboratório
+        [HttpGet]
+        public async Task<IActionResult> Pesquisar(string search)
+        {
+            ViewData["Search"] = search;
+
+            var query = _context.Salas
+                .Include(s => s.Escola)
+                .Include(s => s.TipoAula) // Inclui o tipo de aula
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(search))
+            {
+                search = search.ToLower();
+                bool isNumero = int.TryParse(search, out int capacidadeNumero);
+
+                query = query.Where(s =>
+                    s.Nome.ToLower().Contains(search) ||
+                    (s.TipoAula != null && s.TipoAula.Tipo.ToLower().Contains(search)) ||
+                    s.Escola.Nome.ToLower().Contains(search) ||
+                    (isNumero && s.Capacidade == capacidadeNumero)
+                );
+            }
+
+            var resultados = await query.OrderBy(s => s.Nome).ToListAsync();
+
+            return View("Index", resultados);
+        }
+
 
         private bool SalaExists(int id)
         {

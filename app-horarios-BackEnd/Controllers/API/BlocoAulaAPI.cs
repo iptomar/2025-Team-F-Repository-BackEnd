@@ -39,7 +39,6 @@ namespace app_horarios_BackEnd.Controllers.API
                     DisciplinaNome = b.Disciplina.Nome,
                     TipoAulaNome = b.TipoAula.Tipo,
                     SalaNome = b.Sala.Nome,
-                    DiaSemana = b.DiaSemana,
                     Duracao = b.Duracao,
                     Professores = b.Disciplina.DisciplinaCursoProfessores
                         .Where(dcp => dcp.CursoId == cursoId)
@@ -54,14 +53,10 @@ namespace app_horarios_BackEnd.Controllers.API
                 NomeDisciplina = b.DisciplinaNome ?? "Disciplina indefinida",
                 TipoAula = b.TipoAulaNome ?? "Tipo indefinido",
                 NomeSala = b.SalaNome ?? "Sala indefinida",
-                DiaSemana = b.DiaSemana ?? "Dia indefinido",
                 Duracao = b.Duracao,
                 NomeProfessor = b.Professores.ToString()
             }).ToList();
-
-
-
-
+            
 
             return blocos;
         }
@@ -78,13 +73,11 @@ namespace app_horarios_BackEnd.Controllers.API
             // Cria o bloco
             var bloco = new BlocoAula
             {
-                DiaSemana = dto.DiaSemana,
                 Duracao = dto.Duracao,
                 DisciplinaId = dto.DisciplinaId,
                 SalaId = dto.SalaId,
                 TipoAulaId = dto.TipoAulaId,
-                ProfessorId = dto.ProfessorId,
-                HorarioId = dto.HorarioId
+                ProfessorId = dto.ProfessorId
             };
 
             _context.BlocosAulas.Add(bloco);

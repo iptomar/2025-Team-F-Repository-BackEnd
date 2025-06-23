@@ -8,7 +8,11 @@ public class Sala
     public int Id { get; set; }
     public string Nome { get; set; }
     public int Capacidade { get; set; }
-    public string? Tipo { get; set; }
+    [Required]
+    public int? TipoAulaId { get; set; } // <- IMPORTANTE: int? para aceitar vazio
+
+    [ForeignKey("TipoAulaId")]
+    public TipoAula TipoAula { get; set; }
 
     [Required]
     public int? EscolaId { get; set; } // <- IMPORTANTE: int? para aceitar vazio
