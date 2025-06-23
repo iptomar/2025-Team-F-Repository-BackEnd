@@ -22,7 +22,7 @@ namespace app_horarios_BackEnd.Controllers.API
             var utilizador = await _context.Utilizadores
                 .FirstOrDefaultAsync(u => u.Email == request.Email && u.PasswordHash == request.Password);
 
-            if (utilizador == null)
+            if (utilizador != null)
             {
                 return Unauthorized(new { message = "Credenciais inválidas" });
             }
