@@ -1,5 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
+
 namespace App_horarios_BackEnd.Models
 {
     public class Utilizador
