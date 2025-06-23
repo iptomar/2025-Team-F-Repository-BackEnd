@@ -134,16 +134,13 @@ namespace app_horarios_BackEnd.Migrations
             modelBuilder.Entity("App_horarios_BackEnd.Models.ComissaoCurso", b =>
                 {
                     b.Property<int>("IdUtilizador")
-                        .HasColumnType("integer")
-                        .HasColumnOrder(0);
+                        .HasColumnType("integer");
 
                     b.Property<int>("CursoId")
-                        .HasColumnType("integer")
-                        .HasColumnOrder(1);
+                        .HasColumnType("integer");
 
                     b.Property<int>("EscolaId")
-                        .HasColumnType("integer")
-                        .HasColumnOrder(2);
+                        .HasColumnType("integer");
 
                     b.HasKey("IdUtilizador", "CursoId", "EscolaId");
 
@@ -184,6 +181,57 @@ namespace app_horarios_BackEnd.Migrations
                     b.HasIndex("LocalizacaoId");
 
                     b.ToTable("Cursos");
+                });
+
+            modelBuilder.Entity("App_horarios_BackEnd.Models.DTO.BlocoHorarioDTO", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BlocoAulaId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DiaSemana")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("HoraFim")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("HoraInicio")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("HorarioDTOId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("HorarioId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HorarioDTOId");
+
+                    b.ToTable("BlocoHorarioDTO");
+                });
+
+            modelBuilder.Entity("App_horarios_BackEnd.Models.DTO.HorarioDTO", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("TurmaId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HorarioDTO");
                 });
 
             modelBuilder.Entity("App_horarios_BackEnd.Models.DiretorCurso", b =>
@@ -715,6 +763,13 @@ namespace app_horarios_BackEnd.Migrations
                     b.Navigation("Localizacao");
                 });
 
+            modelBuilder.Entity("App_horarios_BackEnd.Models.DTO.BlocoHorarioDTO", b =>
+                {
+                    b.HasOne("App_horarios_BackEnd.Models.DTO.HorarioDTO", null)
+                        .WithMany("BlocosHorarios")
+                        .HasForeignKey("HorarioDTOId");
+                });
+
             modelBuilder.Entity("App_horarios_BackEnd.Models.DiretorCurso", b =>
                 {
                     b.HasOne("App_horarios_BackEnd.Models.Curso", "Curso")
@@ -904,6 +959,11 @@ namespace app_horarios_BackEnd.Migrations
                     b.Navigation("DisciplinaCursoProfessor");
 
                     b.Navigation("Turmas");
+                });
+
+            modelBuilder.Entity("App_horarios_BackEnd.Models.DTO.HorarioDTO", b =>
+                {
+                    b.Navigation("BlocosHorarios");
                 });
 
             modelBuilder.Entity("App_horarios_BackEnd.Models.Disciplina", b =>
