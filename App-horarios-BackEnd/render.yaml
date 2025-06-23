@@ -9,5 +9,6 @@ services:
     envVars:
       - key: ASPNETCORE_ENVIRONMENT
         value: Production
+        
       - key: ConnectionStrings__DefaultConnection
         value: Host=metro.proxy.rlwy.net;Port=41551;Database=railway;Username=postgres;Password=GsSwLEymrzGVkhVUPoYczvOvFQoQnERb;SSL Mode=Require

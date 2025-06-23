@@ -71,6 +71,7 @@ public class ExcelImportService
                     break;
 
                 case "cursos":
+                case "curso":
                     await ImportCursos(table);
                     break;
 
@@ -79,7 +80,7 @@ public class ExcelImportService
 
         await _context.SaveChangesAsync(); // Grava base de dados principal
 
-        foreach (DataTable table in dataSet.Tables)
+       /* foreach (DataTable table in dataSet.Tables)
         {
             string sheetName = table.TableName.Trim().ToLower();
 
@@ -108,7 +109,7 @@ public class ExcelImportService
         }
 
         await _context.SaveChangesAsync(); // Grava os relacionamentos
-        
+        */
     }
     
     private async Task ImportGraus(DataTable table)
@@ -556,79 +557,75 @@ public class ExcelImportService
 
 
     private async Task ImportDisciplinas(DataTable table)
+{
+    var disciplinasExistentes = await _context.Disciplinas
+        .AsNoTracking()
+        .ToDictionaryAsync(d => d.Id); // CD_DISCIP
+
+    var cursosExistentes = await _context.Cursos
+        .AsNoTracking()
+        .ToDictionaryAsync(c => c.Id); // ✅ apenas pelo Id
+
+    var associacoesExistentes = await _context.DisciplinaCursoProfessor
+        .AsNoTracking()
+        .Select(x => new { x.CursoId, x.DisciplinaId })
+        .ToListAsync();
+
+    var associacoesSet = new HashSet<(int cursoId, int disciplinaId)>(
+        associacoesExistentes.Select(x => (x.CursoId, x.DisciplinaId))
+    );
+
+    for (int i = 0; i < table.Rows.Count; i++)
     {
-        var disciplinasExistentes = await _context.Disciplinas
-            .AsNoTracking()
-            .ToDictionaryAsync(d => d.Id); // CD_DISCIP
+        var row = table.Rows[i];
 
-        var cursosExistentes = await _context.Cursos
-            .AsNoTracking()
-            .ToDictionaryAsync(c => (c.Id, c.EscolaId));
+        if (!int.TryParse(row["CD_DISCIP"]?.ToString(), out int disciplinaId) ||
+            !int.TryParse(row["CD_CURSO"]?.ToString(), out int cursoId))
+            continue;
 
-        var associacoesExistentes = await _context.DisciplinaCursoProfessor
-            .AsNoTracking()
-            .Select(x => new { x.CursoId, x.EscolaId, x.DisciplinaId })
-            .ToListAsync();
+        string nome = row["DS_DISCIP"]?.ToString()?.Trim();
 
-        var associacoesSet = new HashSet<(int cursoId, int escolaId, int disciplinaId)>(
-            associacoesExistentes.Select(x => (x.CursoId, x.EscolaId, x.DisciplinaId))
-        );
-
-
-        for (int i = 0; i < table.Rows.Count; i++)
+        if (!disciplinasExistentes.ContainsKey(disciplinaId))
         {
-            var row = table.Rows[i];
-
-            if (!int.TryParse(row["CD_DISCIP"]?.ToString(), out int disciplinaId) ||
-                !int.TryParse(row["CD_CURSO"]?.ToString(), out int cursoId) ||
-                !int.TryParse(row["CD_INSTITUIC"]?.ToString(), out int escolaId))
-                continue;
-
-            string nome = row["DS_DISCIP"]?.ToString()?.Trim();
-
-            // Verifica se já temos essa disciplina (salva uma vez só)
-            if (!disciplinasExistentes.ContainsKey(disciplinaId))
+            var disciplina = new Disciplina
             {
-                var disciplina = new Disciplina
-                {
-                    Id = disciplinaId,
-                    Nome = nome,
-                    Ano = int.TryParse(row["ANO"]?.ToString(), out int ano) ? ano : null,
-                    Semestre = row["SEMESTRE"]?.ToString(),
-                    Tipo = row["TIPO"]?.ToString(),
+                Id = disciplinaId,
+                Nome = nome,
+                Ano = int.TryParse(row["ANO"]?.ToString(), out int ano) ? ano : null,
+                Semestre = row["SEMESTRE"]?.ToString(),
+                Tipo = row["TIPO"]?.ToString(),
 
-                    HorasTeorica = int.TryParse(row["HR_TEORICA"]?.ToString(), out int ht) ? ht : null,
-                    HorasPratica = int.TryParse(row["HR_PRATICA"]?.ToString(), out int hp) ? hp : null,
-                    HorasTp = int.TryParse(row["HR_TEO_PRA"]?.ToString(), out int htp) ? htp : null,
-                    HorasSeminario = int.TryParse(row["HR_SEMINAR"]?.ToString(), out int hs) ? hs : null,
-                    HorasLaboratorio = int.TryParse(row["HR_LABORAT"]?.ToString(), out int hl) ? hl : null,
-                    HorasCampo = int.TryParse(row["HR_CAMPO"]?.ToString(), out int hc) ? hc : null,
-                    HorasOrientacao = int.TryParse(row["HR_ORIENTACAO"]?.ToString(), out int ho) ? ho : null,
-                    HorasEstagio = int.TryParse(row["HR_ESTAGIO"]?.ToString(), out int he) ? he : null,
-                    HorasOutras = int.TryParse(row["HR_OUTRA"]?.ToString(), out int ho2) ? ho2 : null
-                };
+                HorasTeorica = int.TryParse(row["HR_TEORICA"]?.ToString(), out int ht) ? ht : null,
+                HorasPratica = int.TryParse(row["HR_PRATICA"]?.ToString(), out int hp) ? hp : null,
+                HorasTp = int.TryParse(row["HR_TEO_PRA"]?.ToString(), out int htp) ? htp : null,
+                HorasSeminario = int.TryParse(row["HR_SEMINAR"]?.ToString(), out int hs) ? hs : null,
+                HorasLaboratorio = int.TryParse(row["HR_LABORAT"]?.ToString(), out int hl) ? hl : null,
+                HorasCampo = int.TryParse(row["HR_CAMPO"]?.ToString(), out int hc) ? hc : null,
+                HorasOrientacao = int.TryParse(row["HR_ORIENTACAO"]?.ToString(), out int ho) ? ho : null,
+                HorasEstagio = int.TryParse(row["HR_ESTAGIO"]?.ToString(), out int he) ? he : null,
+                HorasOutras = int.TryParse(row["HR_OUTRA"]?.ToString(), out int ho2) ? ho2 : null
+            };
 
-                _context.Disciplinas.Add(disciplina);
-                disciplinasExistentes[disciplinaId] = disciplina;
-            }
-
-            // Verifica se já existe associação Curso x Escola x Disciplina
-            var chave = (cursoId, escolaId, disciplinaId);
-            if (!associacoesSet.Contains(chave))
-            {
-                var associacao = new DisciplinaCursoProfessor
-                {
-                    CursoId = cursoId,
-                    EscolaId = escolaId,
-                    DisciplinaId = disciplinaId,
-                    ProfessorId = null // inicialmente sem professor
-                };
-
-                _context.DisciplinaCursoProfessor.Add(associacao);
-                associacoesSet.Add(chave);
-            }
+            _context.Disciplinas.Add(disciplina);
+            disciplinasExistentes[disciplinaId] = disciplina;
         }
 
-        await _context.SaveChangesAsync();
+        var chave = (cursoId, disciplinaId);
+        if (!associacoesSet.Contains(chave))
+        {
+            var associacao = new DisciplinaCursoProfessor
+            {
+                CursoId = cursoId,
+                DisciplinaId = disciplinaId,
+                ProfessorId = null
+            };
+
+            _context.DisciplinaCursoProfessor.Add(associacao);
+            associacoesSet.Add(chave);
+        }
     }
+
+    await _context.SaveChangesAsync();
+}
+
 }

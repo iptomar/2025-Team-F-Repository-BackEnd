@@ -6,7 +6,7 @@ WORKDIR /app
 COPY . .
 
 # Entra no diretório do projeto
-WORKDIR /app/app-horarios-BackEnd
+WORKDIR /app/App-horarios-BackEnd
 
 # Restaura e publica
 RUN dotnet restore "App-horarios-BackEnd.csproj"
