@@ -45,7 +45,10 @@ builder.Services.AddRazorPages();
 builder.Services.AddSession();
 
 builder.Services.AddDbContext<HorarioDbContext>(options =>
-    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+{
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection"));
+    options.EnableSensitiveDataLogging(); // Mostra os valores exatos em erros e logs
+});
 
 var app = builder.Build();
 
