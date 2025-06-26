@@ -117,17 +117,14 @@ namespace app_horarios_BackEnd.Controllers.API
             return Ok(horario.BlocosHorarios);
         }
 
-        // ✅ POST - Salvar todos os blocos da grade de uma turma
         [HttpPost("salvar-horario")]
         public async Task<ActionResult> SalvarHorario([FromBody] List<BlocoHorario> blocos)
         {
             if (blocos == null || blocos.Count == 0)
                 return BadRequest("Lista de blocos vazia.");
 
-            // Garante que o blocoAulaId existe
             int blocoAulaId = blocos.First().BlocoAulaId;
 
-            // Busca a turma associada ao blocoAula
             var blocoAula = await _context.BlocosAulas
                 .Include(b => b.Turma)
                 .FirstOrDefaultAsync(b => b.Id == blocoAulaId);
@@ -137,7 +134,6 @@ namespace app_horarios_BackEnd.Controllers.API
 
             int turmaId = blocoAula.TurmaId;
 
-            // Verifica se já existe horário da turma
             var horario = await _context.Horarios
                 .Include(h => h.BlocosHorarios)
                 .FirstOrDefaultAsync(h => h.TurmaId == turmaId);
@@ -146,11 +142,10 @@ namespace app_horarios_BackEnd.Controllers.API
             {
                 horario = new Horario { TurmaId = turmaId };
                 _context.Horarios.Add(horario);
-                await _context.SaveChangesAsync(); // Gera o Id do horário
+                await _context.SaveChangesAsync();
             }
             else
             {
-                // Remove os blocos anteriores (opcional, para recriar o horário)
                 _context.BlocosHorarios.RemoveRange(horario.BlocosHorarios);
                 await _context.SaveChangesAsync();
             }
@@ -164,6 +159,7 @@ namespace app_horarios_BackEnd.Controllers.API
             await _context.SaveChangesAsync();
             return Ok("Horário salvo com sucesso.");
         }
+
 
         private bool HorarioExists(int id)
         {
