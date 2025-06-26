@@ -31,6 +31,7 @@ ViewData["Title"] = "Secretariados";
     <table class="table table-hover table-bordered shadow-sm rounded bg-white">
         <thead class="table-success text-dark">
         <tr>
+            <th class="text-center">Código</th>
             <th class="text-center">@Html.DisplayNameFor(model => model.First().Nome)</th>
             <th class="text-center">@Html.DisplayNameFor(model => model.First().Email)</th>
             <th class="text-center">Escola</th>
@@ -42,6 +43,7 @@ ViewData["Title"] = "Secretariados";
         @foreach (var item in Model)
         {
         <tr>
+            <td class="text-center">@item.IdUtilizador</td>
             <td class="text-center">@item.Nome</td>
             <td class="text-center">@item.Email</td>
             <td class="text-center">@item.Escola?.Nome</td>

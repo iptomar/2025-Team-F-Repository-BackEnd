@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using app_horarios_BackEnd.Data;
@@ -11,9 +12,11 @@ using app_horarios_BackEnd.Data;
 namespace app_horarios_BackEnd.Migrations
 {
     [DbContext(typeof(HorarioDbContext))]
-    partial class HorarioDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250625165442_CriartblDCP")]
+    partial class CriartblDCP
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -60,16 +63,13 @@ namespace app_horarios_BackEnd.Migrations
                     b.Property<int>("Duracao")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("ProfessorId")
+                    b.Property<int>("ProfessorId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("SalaId")
+                    b.Property<int>("SalaId")
                         .HasColumnType("integer");
 
                     b.Property<int>("TipoAulaId")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("TurmaId")
                         .HasColumnType("integer");
 
                     b.HasKey("Id");
@@ -81,8 +81,6 @@ namespace app_horarios_BackEnd.Migrations
                     b.HasIndex("SalaId");
 
                     b.HasIndex("TipoAulaId");
-
-                    b.HasIndex("TurmaId");
 
                     b.ToTable("BlocosAulas");
                 });
@@ -116,7 +114,7 @@ namespace app_horarios_BackEnd.Migrations
 
                     b.HasIndex("HorarioId");
 
-                    b.ToTable("BlocosHorarios");
+                    b.ToTable("BlocoHorario");
                 });
 
             modelBuilder.Entity("App_horarios_BackEnd.Models.CategoriaDocente", b =>
@@ -186,6 +184,57 @@ namespace app_horarios_BackEnd.Migrations
                     b.HasIndex("LocalizacaoId");
 
                     b.ToTable("Cursos");
+                });
+
+            modelBuilder.Entity("App_horarios_BackEnd.Models.DTO.BlocoHorarioDTO", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BlocoAulaId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DiaSemana")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("HoraFim")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("HoraInicio")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("HorarioDTOId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("HorarioId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("HorarioDTOId");
+
+                    b.ToTable("BlocoHorarioDTO");
+                });
+
+            modelBuilder.Entity("App_horarios_BackEnd.Models.DTO.HorarioDTO", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("TurmaId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("HorarioDTO");
                 });
 
             modelBuilder.Entity("App_horarios_BackEnd.Models.DiretorCurso", b =>
@@ -272,12 +321,22 @@ namespace app_horarios_BackEnd.Migrations
                     b.Property<int>("DisciplinaId")
                         .HasColumnType("integer");
 
-                    b.Property<int?>("ProfessorId")
+                    b.Property<int?>("CursoId1")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("DisciplinaId1")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ProfessorId")
                         .HasColumnType("integer");
 
                     b.HasKey("CursoId", "DisciplinaId");
 
+                    b.HasIndex("CursoId1");
+
                     b.HasIndex("DisciplinaId");
+
+                    b.HasIndex("DisciplinaId1");
 
                     b.HasIndex("ProfessorId");
 
@@ -338,9 +397,6 @@ namespace app_horarios_BackEnd.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<bool>("Bloqueado")
-                        .HasColumnType("boolean");
 
                     b.Property<int>("TurmaId")
                         .HasColumnType("integer");
@@ -601,21 +657,19 @@ namespace app_horarios_BackEnd.Migrations
 
                     b.HasOne("App_horarios_BackEnd.Models.Professor", "Professor")
                         .WithMany()
-                        .HasForeignKey("ProfessorId");
+                        .HasForeignKey("ProfessorId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("App_horarios_BackEnd.Models.Sala", "Sala")
                         .WithMany()
-                        .HasForeignKey("SalaId");
+                        .HasForeignKey("SalaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("App_horarios_BackEnd.Models.TipoAula", "TipoAula")
                         .WithMany()
                         .HasForeignKey("TipoAulaId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("App_horarios_BackEnd.Models.Turma", "Turma")
-                        .WithMany()
-                        .HasForeignKey("TurmaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -626,8 +680,6 @@ namespace app_horarios_BackEnd.Migrations
                     b.Navigation("Sala");
 
                     b.Navigation("TipoAula");
-
-                    b.Navigation("Turma");
                 });
 
             modelBuilder.Entity("App_horarios_BackEnd.Models.BlocoHorario", b =>
@@ -701,6 +753,13 @@ namespace app_horarios_BackEnd.Migrations
                     b.Navigation("Localizacao");
                 });
 
+            modelBuilder.Entity("App_horarios_BackEnd.Models.DTO.BlocoHorarioDTO", b =>
+                {
+                    b.HasOne("App_horarios_BackEnd.Models.DTO.HorarioDTO", null)
+                        .WithMany("BlocosHorarios")
+                        .HasForeignKey("HorarioDTOId");
+                });
+
             modelBuilder.Entity("App_horarios_BackEnd.Models.DiretorCurso", b =>
                 {
                     b.HasOne("App_horarios_BackEnd.Models.Curso", "Curso")
@@ -731,21 +790,30 @@ namespace app_horarios_BackEnd.Migrations
             modelBuilder.Entity("App_horarios_BackEnd.Models.DisciplinaCursoProfessor", b =>
                 {
                     b.HasOne("App_horarios_BackEnd.Models.Curso", "Curso")
-                        .WithMany("DisciplinaCursoProfessor")
+                        .WithMany()
                         .HasForeignKey("CursoId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("App_horarios_BackEnd.Models.Disciplina", "Disciplina")
+                    b.HasOne("App_horarios_BackEnd.Models.Curso", null)
                         .WithMany("DisciplinaCursoProfessor")
+                        .HasForeignKey("CursoId1");
+
+                    b.HasOne("App_horarios_BackEnd.Models.Disciplina", "Disciplina")
+                        .WithMany()
                         .HasForeignKey("DisciplinaId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("App_horarios_BackEnd.Models.Disciplina", null)
+                        .WithMany("DisciplinaCursoProfessores")
+                        .HasForeignKey("DisciplinaId1");
+
                     b.HasOne("App_horarios_BackEnd.Models.Professor", "Professor")
-                        .WithMany("DisciplinaCursoProfessor")
+                        .WithMany()
                         .HasForeignKey("ProfessorId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Curso");
 
@@ -862,9 +930,14 @@ namespace app_horarios_BackEnd.Migrations
                     b.Navigation("Turmas");
                 });
 
+            modelBuilder.Entity("App_horarios_BackEnd.Models.DTO.HorarioDTO", b =>
+                {
+                    b.Navigation("BlocosHorarios");
+                });
+
             modelBuilder.Entity("App_horarios_BackEnd.Models.Disciplina", b =>
                 {
-                    b.Navigation("DisciplinaCursoProfessor");
+                    b.Navigation("DisciplinaCursoProfessores");
                 });
 
             modelBuilder.Entity("App_horarios_BackEnd.Models.Escola", b =>
@@ -882,11 +955,6 @@ namespace app_horarios_BackEnd.Migrations
             modelBuilder.Entity("App_horarios_BackEnd.Models.Localizacao", b =>
                 {
                     b.Navigation("Escolas");
-                });
-
-            modelBuilder.Entity("App_horarios_BackEnd.Models.Professor", b =>
-                {
-                    b.Navigation("DisciplinaCursoProfessor");
                 });
 
             modelBuilder.Entity("App_horarios_BackEnd.Models.Turma", b =>

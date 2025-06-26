@@ -26,6 +26,7 @@ ViewData["Title"] = "Blocos de Aula";
     <table class="table table-hover table-bordered shadow-sm rounded bg-white">
         <thead class="table-success text-dark">
         <tr>
+            <th class="text-center">Código</th>
             <th class="text-center">Disciplina</th>
             <th class="text-center">Professor</th>
             <th class="text-center">Sala</th>
@@ -38,6 +39,7 @@ ViewData["Title"] = "Blocos de Aula";
         @foreach (var item in Model)
         {
         <tr>
+            <td class="text-center">@item.Id</td>
             <td class="text-center">@item.Disciplina?.Nome</td>
             <td class="text-center">@item.Professor?.Nome</td>
             <td class="text-center">@item.Sala?.Nome</td>

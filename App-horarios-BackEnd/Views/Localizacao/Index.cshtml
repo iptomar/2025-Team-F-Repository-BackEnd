@@ -30,6 +30,7 @@ ViewData["Title"] = "Localizações";
     <table class="table table-hover table-bordered shadow-sm rounded bg-white">
         <thead class="table-success text-dark">
         <tr>
+            <th class="text-center">Código</th>
             <th class="text-center">Nome</th>
             <th class="text-center">Abreviação</th>
             <th class="text-center">Ações</th>
@@ -39,6 +40,7 @@ ViewData["Title"] = "Localizações";
         @foreach (var item in Model)
         {
         <tr>
+            <td class="text-center">@Html.DisplayFor(modelItem => item.Id)</td>
             <td class="text-center">@Html.DisplayFor(modelItem => item.Nome)</td>
             <td class="text-center">@Html.DisplayFor(modelItem => item.Abreviacao)</td>
             <td class="text-center">

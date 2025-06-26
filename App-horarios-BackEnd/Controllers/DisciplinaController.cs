@@ -24,9 +24,7 @@ namespace app_horarios_BackEnd.Controllers
         // GET: Disciplina
         public async Task<IActionResult> Index()
         {
-            var horarioDbContext = _context.Disciplinas
-                .Include(d => d.Curso)
-                .Include(d => d.Escola); 
+            var horarioDbContext = _context.Disciplinas;
             return View(await horarioDbContext.ToListAsync());
         }
 
@@ -39,8 +37,6 @@ namespace app_horarios_BackEnd.Controllers
             }
 
             var disciplina = await _context.Disciplinas
-                .Include(d => d.Curso)
-                .Include(d => d.Escola)
                 .FirstOrDefaultAsync(m => m.Id == id);
 
             if (disciplina == null)
@@ -55,8 +51,6 @@ namespace app_horarios_BackEnd.Controllers
         // GET: Disciplina/Create
         public IActionResult Create()
         {
-            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Nome");
-            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Nome");
             return View();
         }
 
@@ -65,7 +59,7 @@ namespace app_horarios_BackEnd.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Nome,Ano,Semestre,Tipo,HorasTeorica,HorasPratica,HorasTp,HorasSeminario,HorasLaboratorio,HorasCampo,HorasOrientacao,HorasEstagio,HorasOutras,CursoId,EscolaId")] Disciplina disciplina)
+        public async Task<IActionResult> Create([Bind("Id,Nome,Ano,Semestre,Tipo,HorasTeorica,HorasPratica,HorasTp,HorasSeminario,HorasLaboratorio,HorasCampo,HorasOrientacao,HorasEstagio,HorasOutras")] Disciplina disciplina)
         {
             if (!ModelState.IsValid)
             {
@@ -76,8 +70,6 @@ namespace app_horarios_BackEnd.Controllers
             }
 
             // Repopular os dropdowns em caso de erro
-            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Nome", disciplina.CursoId);
-            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Nome", disciplina.EscolaId);
             return View(disciplina);
         }
 
@@ -95,8 +87,6 @@ namespace app_horarios_BackEnd.Controllers
                 return NotFound();
             }
             
-            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Nome",disciplina.CursoId);
-            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Nome",disciplina.EscolaId);
             return View(disciplina);
         }
 
@@ -105,7 +95,7 @@ namespace app_horarios_BackEnd.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,PlanoId,Ano,Semestre,Tipo,HorasTeorica,HorasPratica,HorasTp,HorasSeminario,HorasLaboratorio,HorasCampo,HorasOrientacao,HorasEstagio,HorasOutras,CursoId,EscolaId")] Disciplina disciplina)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Nome,PlanoId,Ano,Semestre,Tipo,HorasTeorica,HorasPratica,HorasTp,HorasSeminario,HorasLaboratorio,HorasCampo,HorasOrientacao,HorasEstagio,HorasOutras")] Disciplina disciplina)
         {
             if (id != disciplina.Id)
             {
@@ -136,9 +126,6 @@ namespace app_horarios_BackEnd.Controllers
             }
 
             // Repopular dropdowns em caso de erro
-            ViewData["CursoId"] = new SelectList(_context.Cursos, "Id", "Nome", disciplina.CursoId);
-            ViewData["EscolaId"] = new SelectList(_context.Escolas, "Id", "Nome", disciplina.EscolaId);
-
             return View(disciplina);
         }
 
@@ -152,8 +139,6 @@ namespace app_horarios_BackEnd.Controllers
             }
 
             var disciplina = await _context.Disciplinas
-                .Include(d => d.Curso)
-                .Include(d => d.Escola)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (disciplina == null)
             {
@@ -186,8 +171,6 @@ namespace app_horarios_BackEnd.Controllers
         public async Task<IActionResult> Pesquisar(string? search)
         {
             var disciplinas = await _context.Disciplinas
-                .Include(d => d.Curso)
-                .Include(d => d.Escola)
                 .ToListAsync(); // Força execução no banco antes de usar a função local
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -206,9 +189,7 @@ namespace app_horarios_BackEnd.Controllers
                         Normalizar(d.Nome).Contains(searchNormalizado) ||
                         Normalizar(d.Ano.ToString()).Contains(searchNormalizado) ||
                         Normalizar(d.Semestre.ToString()).Contains(searchNormalizado) ||
-                        Normalizar(d.Tipo ?? "").Contains(searchNormalizado) ||
-                        Normalizar(d.Curso?.Nome ?? "").Contains(searchNormalizado) ||
-                        Normalizar(d.Escola?.Nome ?? "").Contains(searchNormalizado)
+                        Normalizar(d.Tipo ?? "").Contains(searchNormalizado) 
                     )
                     .ToList();
             }

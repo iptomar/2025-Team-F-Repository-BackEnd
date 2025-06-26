@@ -38,5 +38,19 @@ namespace app_horarios_BackEnd.Controllers.API
                 .ToListAsync();
         }
         
+        [HttpPut("turma/{id}/bloquear")]
+        public async Task<IActionResult> BloquearTurma(int id)
+        {
+            var turma = await _context.Turmas.FindAsync(id);
+            if (turma == null)
+                return NotFound("Turma não encontrada.");
+
+            turma.Aberta = false;
+            await _context.SaveChangesAsync();
+
+            return Ok("Turma bloqueada com sucesso.");
+        }
+
+        
     }
 }

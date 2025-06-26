@@ -22,6 +22,9 @@ public class HorarioDbContext : DbContext
     public DbSet<Horario> Horarios { get; set; }
     public DbSet<TipoAula> TiposAula { get; set; }
     public DbSet<BlocoAula> BlocosAulas { get; set; }
+    
+    public DbSet<BlocoHorario> BlocosHorarios { get; set; }
+    
     public DbSet<Aluno> Alunos { get; set; }
     public DbSet<TransferenciaTurma> TransferenciasTurma { get; set; }
     public DbSet<Secretariado> Secretariados { get; set; }
@@ -55,21 +58,25 @@ public class HorarioDbContext : DbContext
         modelBuilder.Entity<DisciplinaCursoProfessor>()
             .HasKey(dcp => new { dcp.CursoId, dcp.DisciplinaId });
 
-        modelBuilder.Entity<DisciplinaCursoProfessor>()
-            .HasOne(dcp => dcp.Curso)
-            .WithMany()
-            .HasForeignKey(dcp => dcp.CursoId); // apenas CursoId
-
+        // Relação com Disciplina
         modelBuilder.Entity<DisciplinaCursoProfessor>()
             .HasOne(dcp => dcp.Disciplina)
-            .WithMany(d => d.DisciplinaCursoProfessores)
+            .WithMany(d => d.DisciplinaCursoProfessor) // agora explícito!
             .HasForeignKey(dcp => dcp.DisciplinaId);
 
+        // Relação com Professor (opcional)
         modelBuilder.Entity<DisciplinaCursoProfessor>()
             .HasOne(dcp => dcp.Professor)
-            .WithMany()
-            .HasForeignKey(dcp => dcp.ProfessorId);
-        
+            .WithMany(p => p.DisciplinaCursoProfessor) // se quiser também aqui
+            .HasForeignKey(dcp => dcp.ProfessorId)
+            .OnDelete(DeleteBehavior.Restrict); // ou .SetNull, conforme tua lógica
+
+        // Relação com Curso
+        modelBuilder.Entity<DisciplinaCursoProfessor>()
+            .HasOne(dcp => dcp.Curso)
+            .WithMany(c => c.DisciplinaCursoProfessor) // aqui está o segredo!
+            .HasForeignKey(dcp => dcp.CursoId);
+
         
         //ComissaoCurso
         modelBuilder.Entity<ComissaoCurso>()
@@ -108,11 +115,13 @@ public class HorarioDbContext : DbContext
             .HasOne(dc => dc.Escola)
             .WithMany()
             .HasForeignKey(dc => dc.EscolaId);
+        
+        modelBuilder.Entity<BlocoAula>()
+            .HasOne(b => b.Turma)
+            .WithMany() // ou .WithMany(t => t.BlocosAula) se tiveres navegação inversa
+            .HasForeignKey(b => b.TurmaId)
+            .OnDelete(DeleteBehavior.Cascade); // ou Restrict, dependendo da tua lógica
+
     }
-
-public DbSet<App_horarios_BackEnd.Models.DTO.BlocoHorarioDTO> BlocoHorarioDTO { get; set; } = default!;
-
-public DbSet<App_horarios_BackEnd.Models.DTO.HorarioDTO> HorarioDTO { get; set; } = default!;
-
     
 }

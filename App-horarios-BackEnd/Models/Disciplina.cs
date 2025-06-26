@@ -18,10 +18,5 @@ public class Disciplina
     public int? HorasEstagio { get; set; }
     public int? HorasOutras { get; set; }
     
-    public int EscolaId { get; set; }
-    public Escola Escola { get; set; }
-
-    public int CursoId { get; set; }
-    public Curso Curso { get; set; }
-    public ICollection<DisciplinaCursoProfessor> DisciplinaCursoProfessores { get; set; }
+    public ICollection<DisciplinaCursoProfessor> DisciplinaCursoProfessor { get; set; }
 }

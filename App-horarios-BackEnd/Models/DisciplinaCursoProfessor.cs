@@ -2,8 +2,6 @@ namespace App_horarios_BackEnd.Models;
 
 public class DisciplinaCursoProfessor
 {
-    public int Id { get; set; }
-
     public int DisciplinaId { get; set; }
     public Disciplina Disciplina { get; set; }
 

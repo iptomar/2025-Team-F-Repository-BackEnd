@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using App_horarios_BackEnd.Models;
 using app_horarios_BackEnd.Data;
+using App_horarios_BackEnd.Models.DTO;
 
 namespace app_horarios_BackEnd.Controllers.API
 {
@@ -100,9 +101,125 @@ namespace app_horarios_BackEnd.Controllers.API
             return NoContent();
         }
 
+
+        // ✅ GET - Obter todos os blocos de horário de uma turma
+        [HttpGet("turma/{turmaId}")]
+        public async Task<ActionResult<IEnumerable<BlocoHorario>>> GetHorarioPorTurma(int turmaId)
+        {
+            var horario = await _context.Horarios
+                .Include(h => h.BlocosHorarios)
+                .ThenInclude(bh => bh.BlocoAula)
+                .FirstOrDefaultAsync(h => h.TurmaId == turmaId);
+
+            if (horario == null)
+                return NotFound("Horário não encontrado para a turma.");
+
+            return Ok(horario.BlocosHorarios);
+        }
+
+        // ✅ POST - Salvar todos os blocos da grade de uma turma
+        [HttpPost("salvar-horario")]
+        public async Task<ActionResult> SalvarHorario([FromBody] List<BlocoHorario> blocos)
+        {
+            if (blocos == null || blocos.Count == 0)
+                return BadRequest("Lista de blocos vazia.");
+
+            int turmaId = blocos.First().BlocoAula?.TurmaId ?? 0;
+
+            // Verifica se já existe horário da turma
+            var horario = await _context.Horarios
+                .Include(h => h.BlocosHorarios)
+                .FirstOrDefaultAsync(h => h.TurmaId == turmaId);
+
+            if (horario == null)
+            {
+                horario = new Horario { TurmaId = turmaId };
+                _context.Horarios.Add(horario);
+                await _context.SaveChangesAsync(); // Gera o Id do horário
+            }
+            else
+            {
+                // Remove os blocos anteriores (opcional, para recriar o horário)
+                _context.BlocosHorarios.RemoveRange(horario.BlocosHorarios);
+                await _context.SaveChangesAsync();
+            }
+
+            foreach (var bloco in blocos)
+            {
+                bloco.HorarioId = horario.Id;
+                _context.BlocosHorarios.Add(bloco);
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok("Horário salvo com sucesso.");
+        }
+
         private bool HorarioExists(int id)
         {
             return _context.Horarios.Any(e => e.Id == id);
         }
+        
+        // POST: api/BlocoHorarioAPI/salvar
+        [HttpPost("salvar")]
+        public async Task<IActionResult> SalvarHorario([FromBody] HorarioDTO dto)
+        {
+            if (dto == null || dto.BlocosHorarios == null || dto.BlocosHorarios.Count == 0)
+                return BadRequest("Dados inválidos.");
+
+            // Verifica se já existe horário para a turma
+            var horarioExistente = await _context.Horarios
+                .Include(h => h.BlocosHorarios)
+                .FirstOrDefaultAsync(h => h.TurmaId == dto.TurmaId);
+
+            if (horarioExistente != null)
+            {
+                if (horarioExistente.Bloqueado)
+                    return BadRequest("Horário bloqueado para alterações.");
+
+                _context.BlocosHorarios.RemoveRange(horarioExistente.BlocosHorarios);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                horarioExistente = new Horario
+                {
+                    TurmaId = dto.TurmaId,
+                    BlocosHorarios = new List<BlocoHorario>()
+                };
+                _context.Horarios.Add(horarioExistente);
+                await _context.SaveChangesAsync();
+            }
+
+
+            // Adiciona os blocos recebidos ao horário
+            foreach (var b in dto.BlocosHorarios)
+            {
+                horarioExistente.BlocosHorarios.Add(new BlocoHorario
+                {
+                    BlocoAulaId = b.BlocoAulaId,
+                    DiaSemana = b.DiaSemana,
+                    HoraInicio = TimeSpan.Parse(b.HoraInicio),
+                    HoraFim = TimeSpan.Parse(b.HoraFim),
+                    HorarioId = horarioExistente.Id
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            return Ok("Horário salvo com sucesso.");
+        }
+        
+        [HttpPut("{id}/bloquear")]
+        public async Task<IActionResult> BloquearHorario(int id)
+        {
+            var horario = await _context.Horarios.FindAsync(id);
+            if (horario == null)
+                return NotFound("Horário não encontrado.");
+
+            horario.Bloqueado = true;
+            await _context.SaveChangesAsync();
+
+            return Ok("Horário bloqueado com sucesso.");
+        }
+
     }
 }

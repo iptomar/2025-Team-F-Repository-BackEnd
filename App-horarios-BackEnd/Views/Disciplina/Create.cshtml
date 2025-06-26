@@ -16,24 +16,6 @@ ViewData["Title"] = "Criar Disciplina";
             <span asp-validation-for="Nome" class="text-danger small"></span>
         </div>
 
-        <!-- Escola e Curso -->
-        <div class="row mb-3">
-            <div class="col-md-6">
-                <label asp-for="EscolaId" class="form-label">Escola</label>
-                <select asp-for="EscolaId" class="form-select" asp-items="ViewBag.EscolaId">
-                    <option value="">-- Selecionar Escola --</option>
-                </select>
-                <span asp-validation-for="EscolaId" class="text-danger small"></span>
-            </div>
-            <div class="col-md-6">
-                <label asp-for="CursoId" class="form-label">Curso</label>
-                <select asp-for="CursoId" class="form-select" asp-items="ViewBag.CursoId">
-                    <option value="">-- Selecionar Curso --</option>
-                </select>
-                <span asp-validation-for="CursoId" class="text-danger small"></span>
-            </div>
-        </div>
-
         <!-- Ano, Semestre, Tipo -->
         <div class="row mb-3">
             <div class="col-md-4">

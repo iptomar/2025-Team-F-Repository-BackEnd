@@ -20,89 +20,24 @@ namespace app_horarios_BackEnd.Controllers.API
         {
             _context = context;
         }
+        
 
         // GET: api/BlocoHorarioAPI
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<BlocoHorarioDTO>>> GetBlocoHorarioDTO()
+        public async Task<ActionResult<IEnumerable<BlocoHorarioDTO>>> GetTodosBlocos()
         {
-            return await _context.BlocoHorarioDTO.ToListAsync();
-        }
-
-        // GET: api/BlocoHorarioAPI/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<BlocoHorarioDTO>> GetBlocoHorarioDTO(int id)
-        {
-            var blocoHorarioDTO = await _context.BlocoHorarioDTO.FindAsync(id);
-
-            if (blocoHorarioDTO == null)
-            {
-                return NotFound();
-            }
-
-            return blocoHorarioDTO;
-        }
-
-        // PUT: api/BlocoHorarioAPI/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutBlocoHorarioDTO(int id, BlocoHorarioDTO blocoHorarioDTO)
-        {
-            if (id != blocoHorarioDTO.Id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(blocoHorarioDTO).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!BlocoHorarioDTOExists(id))
+            var blocos = await _context.BlocosHorarios
+                .Include(b => b.BlocoAula)
+                .Select(b => new BlocoHorarioDTO
                 {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
+                    BlocoAulaId = b.BlocoAulaId,
+                    DiaSemana = b.DiaSemana,
+                    HoraInicio = b.HoraInicio.ToString(@"hh\:mm"),
+                    HoraFim = b.HoraFim.ToString(@"hh\:mm")
+                }).ToListAsync();
 
-            return NoContent();
+            return blocos;
         }
-
-        // POST: api/BlocoHorarioAPI
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<BlocoHorarioDTO>> PostBlocoHorarioDTO(BlocoHorarioDTO blocoHorarioDTO)
-        {
-            _context.BlocoHorarioDTO.Add(blocoHorarioDTO);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetBlocoHorarioDTO", new { id = blocoHorarioDTO.Id }, blocoHorarioDTO);
-        }
-
-        // DELETE: api/BlocoHorarioAPI/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteBlocoHorarioDTO(int id)
-        {
-            var blocoHorarioDTO = await _context.BlocoHorarioDTO.FindAsync(id);
-            if (blocoHorarioDTO == null)
-            {
-                return NotFound();
-            }
-
-            _context.BlocoHorarioDTO.Remove(blocoHorarioDTO);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
-
-        private bool BlocoHorarioDTOExists(int id)
-        {
-            return _context.BlocoHorarioDTO.Any(e => e.Id == id);
-        }
+        
     }
 }

@@ -23,48 +23,33 @@ namespace app_horarios_BackEnd.Controllers.API
         [HttpGet("por-curso/{cursoId}/ano/{ano}/semestre/{semestre}")]
         public async Task<ActionResult<IEnumerable<BlocoPreviewDto>>> GetBlocosFiltrados(int cursoId, int ano, string semestre)
         {
-            var blocosQuery = await _context.BlocosAulas
+            var blocos = await _context.BlocosAulas
                 .Include(b => b.Disciplina)
-                .ThenInclude(d => d.DisciplinaCursoProfessores)
-                .ThenInclude(dcp => dcp.Professor)
+                .ThenInclude(d => d.DisciplinaCursoProfessor)
+                .Include(b => b.Professor)
                 .Include(b => b.Sala)
                 .Include(b => b.TipoAula)
                 .Where(b =>
                     b.Disciplina != null &&
                     b.Disciplina.Ano == ano &&
                     b.Disciplina.Semestre == semestre &&
-                    b.Disciplina.DisciplinaCursoProfessores.Any(dcp => dcp.CursoId == cursoId))
-                .Select(b => new
+                    b.Disciplina.DisciplinaCursoProfessor.Any(dcp => dcp.CursoId == cursoId)
+                )
+                .Select(b => new BlocoPreviewDto
                 {
-                    DisciplinaNome = b.Disciplina.Nome,
-                    TipoAulaNome = b.TipoAula.Tipo,
-                    SalaNome = b.Sala.Nome,
+                    
+                    Id = b.Id,
+                    NomeDisciplina = b.Disciplina.Nome ?? "Disciplina indefinida",
+                    TipoAula = b.TipoAula.Tipo ?? "Tipo indefinido",
+                    NomeSala = b.Sala != null ? b.Sala.Nome : "Sala indefinida",
                     Duracao = b.Duracao,
-                    Professores = b.Disciplina.DisciplinaCursoProfessores
-                        .Where(dcp => dcp.CursoId == cursoId)
-                        .Select(dcp => dcp.Professor.Nome)
-                        .ToList()
+                    NomeProfessor = b.Professor != null ? b.Professor.Nome : "Sem professor"
+
                 })
-                .ToListAsync(); // 👈 ESSE ToListAsync funciona porque é sobre tipo anônimo
-
-
-            var blocos = blocosQuery.Select(b => new BlocoPreviewDto
-            {
-                NomeDisciplina = b.DisciplinaNome ?? "Disciplina indefinida",
-                TipoAula = b.TipoAulaNome ?? "Tipo indefinido",
-                NomeSala = b.SalaNome ?? "Sala indefinida",
-                Duracao = b.Duracao,
-                NomeProfessor = b.Professores.ToString()
-            }).ToList();
-            
+                .ToListAsync();
 
             return blocos;
         }
-
-
-
-        
-
 
         // POST: api/BlocoAulaAPI
         [HttpPost]
@@ -89,7 +74,6 @@ namespace app_horarios_BackEnd.Controllers.API
             return CreatedAtAction(nameof(PostBlocoHorario), new { id = bloco.Id }, dto);
         }
         
-
         
     }
 }

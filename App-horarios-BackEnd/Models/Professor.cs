@@ -11,4 +11,7 @@ public class Professor
 
     public int CategoriaId { get; set; }
     public CategoriaDocente Categoria { get; set; }
+    
+    public ICollection<DisciplinaCursoProfessor> DisciplinaCursoProfessor { get; set; }
+
 }
