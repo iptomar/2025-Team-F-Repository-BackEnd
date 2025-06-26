@@ -58,6 +58,41 @@ namespace app_horarios_BackEnd.Controllers
         {
             if (ModelState.IsValid)
             {
+                
+                // Verifica se já existe utilizador com o mesmo email
+                var existente = await _context.Utilizadores
+                    .FirstOrDefaultAsync(u => u.Email == utilizador.Email);
+
+                if (existente != null)
+                {
+                    ModelState.AddModelError("Email", "Já existe um utilizador com este email.");
+                    return View(utilizador);
+                }
+
+                // Determina o tipo do novo utilizador
+                string tipo = "Secretariado"; // Valor por defeito
+
+                // Tenta encontrar se o novo utilizador está associado a DiretorCurso
+                var isDiretor = await _context.DiretoresCurso
+                    .AnyAsync(d => d.IdUtilizador == utilizador.Id);
+
+                if (isDiretor)
+                {
+                    tipo = "DiretorCurso";
+                }
+                else
+                {
+                    var isComissao = await _context.ComissoesCurso
+                        .AnyAsync(c => c.IdUtilizador == utilizador.Id);
+
+                    if (isComissao)
+                    {
+                        tipo = "ComissaoCurso";
+                    }
+                }
+
+                utilizador.Tipo = tipo;
+
                 _context.Add(utilizador);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));

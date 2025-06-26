@@ -6,8 +6,8 @@ ViewBag.Title = "Importar Dados de Excel";
     <div class="row justify-content-center">
         <div class="col-md-8 col-lg-6">
             <div class="card shadow rounded-3">
-                <div class="card-header text-center bg-primary text-white">
-                    <h4>Importar Dados de Excel com Várias Folhas</h4>
+                <div class="card-header text-white text-center fw-bold rounded-top-4" style="background-color: #78be20;">
+                 <h4>Importar Dados de Excel com Várias Folhas</h4>
                 </div>
                 <div class="card-body">
                     <form asp-action="Index" method="post" enctype="multipart/form-data">
@@ -16,7 +16,7 @@ ViewBag.Title = "Importar Dados de Excel";
                             <input type="file" name="file" class="form-control" required />
                         </div>
                         <div class="d-grid">
-                            <button type="submit" class="btn btn-primary">Importar</button>
+                            <button type="submit" class="btn btn-ipt">Importar</button>
                         </div>
                     </form>
 

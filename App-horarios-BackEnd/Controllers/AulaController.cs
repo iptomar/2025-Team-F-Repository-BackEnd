@@ -252,6 +252,7 @@ namespace app_horarios_BackEnd.Controllers
 
                 blocos = blocos
                     .Where(b =>
+                        Normalizar(b.Disciplina.Id.ToString() ?? "").Contains(termo) ||
                         Normalizar(b.Disciplina?.Nome ?? "").Contains(termo) ||
                         Normalizar(string.Join(" ", b.BlocoAulaProfessores.Select(p => p.Professor.Nome))) // ✅ Professores múltiplos
                             .Contains(termo) ||

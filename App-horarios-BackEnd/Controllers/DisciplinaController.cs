@@ -186,6 +186,7 @@ namespace app_horarios_BackEnd.Controllers
 
                 disciplinas = disciplinas
                     .Where(d =>
+                        Normalizar(d.Id.ToString()).Contains(searchNormalizado) ||
                         Normalizar(d.Nome).Contains(searchNormalizado) ||
                         Normalizar(d.Ano.ToString()).Contains(searchNormalizado) ||
                         Normalizar(d.Semestre.ToString()).Contains(searchNormalizado) ||

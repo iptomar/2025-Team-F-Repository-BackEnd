@@ -1,4 +1,5 @@
 using System.Data;
+using System.Globalization;
 using System.Text;
 using ExcelDataReader;
 using app_horarios_BackEnd.Data;
@@ -663,106 +664,96 @@ public class ExcelImportService
         await _context.SaveChangesAsync();
     }
 
-    private async Task ImportBlocosAulas(DataTable table)
-    {
-        var disciplinas = await _context.Disciplinas.AsNoTracking().ToDictionaryAsync(d => d.Id);
-        var professores = await _context.Professores.AsNoTracking().ToDictionaryAsync(p => p.Id);
-        var cursos = await _context.Cursos.AsNoTracking().ToDictionaryAsync(c => c.Id);
-        var turmas = await _context.Turmas.AsNoTracking().ToListAsync();
-        var turmaLookup = turmas.ToLookup(t => t.CursoId);
+   private async Task ImportBlocosAulas(DataTable table)
+{
+    var disciplinas = await _context.Disciplinas.AsNoTracking().ToDictionaryAsync(d => d.Id);
+    var professores = await _context.Professores.AsNoTracking().ToDictionaryAsync(p => p.Id);
+    var cursos = await _context.Cursos.AsNoTracking().ToDictionaryAsync(c => c.Id);
+    var turmas = await _context.Turmas.AsNoTracking().ToListAsync();
+    var turmaLookup = turmas.ToLookup(t => t.CursoId);
 
-        for (int i = 0; i < table.Rows.Count; i++)
+    var blocosAgrupados = table.AsEnumerable()
+        .Where(row =>
+            int.TryParse(row["cod_disciplina"]?.ToString(), out _) &&
+            int.TryParse(row["cod_curso"]?.ToString(), out _) &&
+            int.TryParse(row["n_turma"]?.ToString(), out _) &&
+            double.TryParse(row["n_horas"]?.ToString()?.Replace(",", "."), NumberStyles.Any,
+                CultureInfo.InvariantCulture, out _)
+        )
+        .GroupBy(row => new
         {
-            var row = table.Rows[i];
+            DisciplinaId = int.Parse(row["cod_disciplina"].ToString()),
+            CursoId = int.Parse(row["cod_curso"].ToString()),
+            TurmaNum = int.Parse(row["n_turma"].ToString()),
+            TipoAulaId = int.TryParse(row["id_tipologia"]?.ToString(), out int tipo) ? tipo : 0
+        })
+        .Select(g => new
+        {
+            g.Key.DisciplinaId,
+            g.Key.CursoId,
+            g.Key.TurmaNum,
+            g.Key.TipoAulaId,
+            TotalHoras = 2,
+            Professores = g
+                .Select(r => int.TryParse(r["id_docente"]?.ToString(), out int profId) ? profId : (int?)null)
+                .Where(p => p.HasValue)
+                .Distinct()
+                .ToList()
+        })
+        .ToList();
 
-            if (!int.TryParse(row["cod_disciplina"]?.ToString(), out int disciplinaId) ||
-                !int.TryParse(row["cod_curso"]?.ToString(), out int cursoId) ||
-                !int.TryParse(row["n_turma"]?.ToString(), out int turmaNum))
-                continue;
+    foreach (var grupo in blocosAgrupados)
+    {
+        if (!disciplinas.ContainsKey(grupo.DisciplinaId) || !cursos.ContainsKey(grupo.CursoId))
+            continue;
 
-            double totalHoras = ParseHoras(row["n_horas"]);
-            if (totalHoras == 0) continue;
-
-            int? professorId =
-                int.TryParse(row["id_docente"]?.ToString(), out int prof) && professores.ContainsKey(prof)
-                    ? prof
-                    : null;
-            int? tipoAulaId = int.TryParse(row["id_tipologia"]?.ToString(), out int tipo) ? tipo : null;
-
-            if (!cursos.ContainsKey(cursoId) || !disciplinas.ContainsKey(disciplinaId))
-                continue;
-
-            // Verifica ou cria a turma
-            var turma = turmaLookup[cursoId].FirstOrDefault(t => t.Nome == GetTurmaNome(turmaNum));
-            if (turma == null)
+        var turma = turmaLookup[grupo.CursoId].FirstOrDefault(t => t.Nome == GetTurmaNome(grupo.TurmaNum));
+        if (turma == null)
+        {
+            turma = new Turma
             {
-                turma = new Turma
-                {
-                    CursoId = cursoId,
-                    Nome = GetTurmaNome(turmaNum),
-                    Aberta = true
-                };
-                _context.Turmas.Add(turma);
-                await _context.SaveChangesAsync();
-                turmaLookup = (await _context.Turmas.AsNoTracking().ToListAsync()).ToLookup(t => t.CursoId);
-            }
-
-            var blocos = DividirHorasEmBlocos(totalHoras);
-
-            foreach (var duracaoMin in blocos)
-            {
-                // Verifica se já existe um bloco com os mesmos dados
-                var blocoExistente = await _context.BlocosAulas.FirstOrDefaultAsync(b =>
-                    b.DisciplinaId == disciplinaId &&
-                    b.TipoAulaId == tipoAulaId &&
-                    b.TurmaId == turma.Id &&
-                    b.Duracao == duracaoMin);
-
-                if (blocoExistente == null)
-                {
-                    blocoExistente = new BlocoAula
-                    {
-                        Duracao = duracaoMin,
-                        DisciplinaId = disciplinaId,
-                        TipoAulaId = tipoAulaId ?? 0,
-                        SalaId = null,
-                        TurmaId = turma.Id,
-                        BlocoAulaProfessores = new List<BlocoAulaProfessor>()
-                    };
-
-                    _context.BlocosAulas.Add(blocoExistente);
-                    await _context.SaveChangesAsync(); // Necessário para obter bloco.Id
-                }
-
-                // Adiciona o professor se ainda não estiver associado
-                if (professorId.HasValue)
-                {
-                    var jaExiste = _context.ChangeTracker.Entries<BlocoAulaProfessor>()
-                        .Any(e =>
-                            e.Entity.BlocoAulaId == blocoExistente.Id &&
-                            e.Entity.ProfessorId == professorId.Value);
-
-                    if (!jaExiste)
-                    {
-                        var existeNaBD = await _context.BlocosAulaProfessores
-                            .AnyAsync(p => p.BlocoAulaId == blocoExistente.Id && p.ProfessorId == professorId.Value);
-
-                        if (!existeNaBD)
-                        {
-                            _context.BlocosAulaProfessores.Add(new BlocoAulaProfessor
-                            {
-                                BlocoAulaId = blocoExistente.Id,
-                                ProfessorId = professorId.Value
-                            });
-                        }
-                    }
-                }
-
-            }
+                CursoId = grupo.CursoId,
+                Nome = GetTurmaNome(grupo.TurmaNum),
+                Aberta = true
+            };
+            _context.Turmas.Add(turma);
+            await _context.SaveChangesAsync();
+            turmaLookup = (await _context.Turmas.AsNoTracking().ToListAsync()).ToLookup(t => t.CursoId);
         }
 
-        await _context.SaveChangesAsync();
+        var blocos = DividirHorasEmBlocos(grupo.TotalHoras);
+
+        foreach (var duracaoMin in blocos)
+        {
+            var bloco = new BlocoAula
+            {
+                Duracao = duracaoMin,
+                DisciplinaId = grupo.DisciplinaId,
+                TipoAulaId = grupo.TipoAulaId,
+                SalaId = null,
+                TurmaId = turma.Id,
+                BlocoAulaProfessores = new List<BlocoAulaProfessor>()
+            };
+
+            foreach (var profId in grupo.Professores)
+            {
+                if (profId.HasValue && professores.ContainsKey(profId.Value))
+                {
+                    bloco.BlocoAulaProfessores.Add(new BlocoAulaProfessor
+                    {
+                        ProfessorId = profId.Value
+                    });
+                }
+                // else ignorado
+            }
+
+            _context.BlocosAulas.Add(bloco);
+        }
     }
+
+    await _context.SaveChangesAsync();
+}
+
 
 
     private static double ParseHoras(object? valor)
@@ -770,49 +761,32 @@ public class ExcelImportService
         if (valor == null || string.IsNullOrWhiteSpace(valor.ToString()))
             return 0;
 
-        // Tenta converter para double, aceita vírgula ou ponto
-        var str = valor.ToString()?.Replace(",", "."); // Trata valores como "10,5"
-        return double.TryParse(str, System.Globalization.NumberStyles.Any,
-            System.Globalization.CultureInfo.InvariantCulture, out double result)
+        var str = valor.ToString()?.Replace(",", ".");
+        return double.TryParse(str, NumberStyles.Any, CultureInfo.InvariantCulture, out double result)
             ? result
             : 0;
     }
 
     private static string GetTurmaNome(int numero)
     {
-        // 1 -> A, 2 -> B, ..., 26 -> Z
-        return ((char)('A' + numero - 1)).ToString();
+        return ((char)('A' + numero - 1)).ToString(); // 1 → A, 2 → B, ...
     }
 
     private static List<int> DividirHorasEmBlocos(double totalHoras)
     {
         var blocos = new List<int>();
-        int minutosRestantes = (int)(totalHoras * 60);
+        int minutosTotais = (int)(totalHoras * 60);
 
-        while (minutosRestantes > 0)
+        int blocosDeDuasHoras = minutosTotais / 120;
+
+        for (int i = 0; i < blocosDeDuasHoras; i++)
         {
-            if (minutosRestantes >= 240)
-            {
-                blocos.Add(240);
-                minutosRestantes -= 240;
-            }
-            else if (minutosRestantes >= 180)
-            {
-                blocos.Add(180);
-                minutosRestantes -= 180;
-            }
-            else if (minutosRestantes >= 120)
-            {
-                blocos.Add(120);
-                minutosRestantes -= 120;
-            }
-            else
-            {
-                blocos.Add(minutosRestantes);
-                break;
-            }
+            blocos.Add(120);
         }
 
         return blocos;
     }
+
+
+
 }
