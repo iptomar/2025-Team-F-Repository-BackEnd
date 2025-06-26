@@ -124,7 +124,18 @@ namespace app_horarios_BackEnd.Controllers.API
             if (blocos == null || blocos.Count == 0)
                 return BadRequest("Lista de blocos vazia.");
 
-            int turmaId = blocos.First().BlocoAula?.TurmaId ?? 0;
+            // Garante que o blocoAulaId existe
+            int blocoAulaId = blocos.First().BlocoAulaId;
+
+            // Busca a turma associada ao blocoAula
+            var blocoAula = await _context.BlocosAulas
+                .Include(b => b.Turma)
+                .FirstOrDefaultAsync(b => b.Id == blocoAulaId);
+
+            if (blocoAula == null)
+                return BadRequest("BlocoAula inválido.");
+
+            int turmaId = blocoAula.TurmaId;
 
             // Verifica se já existe horário da turma
             var horario = await _context.Horarios
