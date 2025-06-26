@@ -228,5 +228,19 @@ namespace app_horarios_BackEnd.Controllers.API
             return Ok("Horário bloqueado com sucesso.");
         }
 
+        // GET: api/HorarioAPI/horario-id/turma/1
+        [HttpGet("horario-id/turma/{turmaId}")]
+        public async Task<ActionResult<int>> GetHorarioIdPorTurma(int turmaId)
+        {
+            var horario = await _context.Horarios
+                .AsNoTracking()
+                .FirstOrDefaultAsync(h => h.TurmaId == turmaId);
+
+            if (horario == null)
+                return NotFound("Horário não encontrado para essa turma.");
+
+            return Ok(horario.Id);
+        }
+
     }
 }
