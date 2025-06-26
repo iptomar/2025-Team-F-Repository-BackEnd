@@ -50,6 +50,19 @@ namespace app_horarios_BackEnd.Controllers.API
 
             return Ok("Turma bloqueada com sucesso.");
         }
+        
+        // GET: api/TurmaAPI/curso/3
+        [HttpGet("curso/{cursoId}")]
+        public async Task<ActionResult<IEnumerable<TurmaDto>>> GetTurmasPorCurso(int cursoId)
+        {
+            var turmas = await _context.Turmas
+                .Where(t => t.CursoId == cursoId)
+                .OrderBy(t => t.Nome)
+                .ToListAsync();
+
+            return Ok(turmas);
+        }
+
 
         
     }
