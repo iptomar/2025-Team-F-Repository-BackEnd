@@ -24,7 +24,12 @@ namespace app_horarios_BackEnd.Controllers
         // GET: AulaController
         public async Task<IActionResult> Index()
         {
-            var horarioDbContext = _context.BlocosAulas.Include(b => b.Disciplina).Include(b => b.Professor).Include(b => b.Sala).Include(b => b.TipoAula);
+            var horarioDbContext = _context.BlocosAulas
+                .Include(b => b.Disciplina)
+                .Include(b => b.Sala)
+                .Include(b => b.TipoAula)
+                .Include(b => b.BlocoAulaProfessores)
+                .ThenInclude(bp => bp.Professor); // ✅ Carrega os professores associados
             return View(await horarioDbContext.ToListAsync());
         }
 
@@ -38,10 +43,12 @@ namespace app_horarios_BackEnd.Controllers
 
             var blocoAula = await _context.BlocosAulas
                 .Include(b => b.Disciplina)
-                .Include(b => b.Professor)
                 .Include(b => b.Sala)
                 .Include(b => b.TipoAula)
+                .Include(b => b.BlocoAulaProfessores)
+                .ThenInclude(bp => bp.Professor) // ✅ Carrega os professores associados
                 .FirstOrDefaultAsync(m => m.Id == id);
+            
             if (blocoAula == null)
             {
                 return NotFound();
@@ -54,9 +61,10 @@ namespace app_horarios_BackEnd.Controllers
         public IActionResult Create()
         {
             ViewData["DisciplinaId"] = new SelectList(_context.Disciplinas, "Id", "Nome");
-            ViewData["ProfessorId"] = new SelectList(_context.Professores, "Id", "Nome");
+            ViewData["Professores"] = new MultiSelectList(_context.Professores, "Id", "Nome");
             ViewData["SalaId"] = new SelectList(_context.Salas, "Id", "Nome");
             ViewData["TipoAulaId"] = new SelectList(_context.TiposAula, "Id", "Tipo");
+            ViewData["TurmaId"] = new SelectList(_context.Turmas, "Id", "Nome");
             return View();
         }
 
@@ -65,19 +73,30 @@ namespace app_horarios_BackEnd.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,Duracao,DisciplinaId,SalaId,TipoAulaId,ProfessorId")] BlocoAula blocoAula)
+        public async Task<IActionResult> Create([Bind("Id,Duracao,DisciplinaId,SalaId,TipoAulaId,TurmaId")] BlocoAula blocoAula, List<int> professorIds)
         {
             if (!ModelState.IsValid)
             {
                 _context.Add(blocoAula);
                 await _context.SaveChangesAsync();
+
+                foreach (var profId in professorIds)
+                {
+                    _context.BlocosAulaProfessores.Add(new BlocoAulaProfessor
+                    {
+                        BlocoAulaId = blocoAula.Id,
+                        ProfessorId = profId
+                    });
+                }
+                await _context.SaveChangesAsync();
                 TempData["SuccessMessage"] = "Aula criado com sucesso!";
                 return RedirectToAction(nameof(Index));
             }
             ViewData["DisciplinaId"] = new SelectList(_context.Disciplinas, "Id", "Nome", blocoAula.DisciplinaId);
-            ViewData["ProfessorId"] = new SelectList(_context.Professores, "Id", "Nome", blocoAula.ProfessorId);
+            ViewData["Professores"] = new MultiSelectList(_context.Professores, "Id", "Nome", professorIds);
             ViewData["SalaId"] = new SelectList(_context.Salas, "Id", "Nome", blocoAula.SalaId);
             ViewData["TipoAulaId"] = new SelectList(_context.TiposAula, "Id", "Tipo", blocoAula.TipoAulaId);
+            ViewData["TurmaId"] = new SelectList(_context.Turmas, "Id", "Nome", blocoAula.TurmaId);
             return View(blocoAula);
             
         }
@@ -90,13 +109,18 @@ namespace app_horarios_BackEnd.Controllers
                 return NotFound();
             }
 
-            var blocoAula = await _context.BlocosAulas.FindAsync(id);
+            var blocoAula = await _context.BlocosAulas
+                .Include(b => b.BlocoAulaProfessores)
+                .FirstOrDefaultAsync(b => b.Id == id);
             if (blocoAula == null)
             {
                 return NotFound();
             }
+            // Obter os IDs dos professores associados
+            var professorIds = blocoAula.BlocoAulaProfessores.Select(p => p.ProfessorId).ToList();
+
             ViewData["DisciplinaId"] = new SelectList(_context.Disciplinas, "Id", "Nome", blocoAula.DisciplinaId);
-            ViewData["ProfessorId"] = new SelectList(_context.Professores, "Id", "Nome", blocoAula.ProfessorId);
+            ViewData["Professores"] = new MultiSelectList(_context.Professores, "Id", "Nome", professorIds);
             ViewData["SalaId"] = new SelectList(_context.Salas, "Id", "Nome", blocoAula.SalaId);
             ViewData["TipoAulaId"] = new SelectList(_context.TiposAula, "Id", "Tipo", blocoAula.TipoAulaId);
             return View(blocoAula);
@@ -107,7 +131,7 @@ namespace app_horarios_BackEnd.Controllers
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,DiaSemana,Duracao,HorarioId,DisciplinaId,SalaId,TipoAulaId,ProfessorId")] BlocoAula blocoAula)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Duracao,HorarioId,DisciplinaId,SalaId,TipoAulaId,ProfessorId")] BlocoAula blocoAula, List<int> professorIds)
         {
             if (id != blocoAula.Id)
             {
@@ -118,7 +142,25 @@ namespace app_horarios_BackEnd.Controllers
             {
                 try
                 {
+                    // Atualizar dados principais do bloco
                     _context.Update(blocoAula);
+                    await _context.SaveChangesAsync();
+
+                    // Remover professores antigos
+                    var antigos = _context.BlocosAulaProfessores
+                        .Where(bp => bp.BlocoAulaId == blocoAula.Id);
+                    _context.BlocosAulaProfessores.RemoveRange(antigos);
+
+                    // Adicionar os novos professores selecionados
+                    foreach (var profId in professorIds)
+                    {
+                        _context.BlocosAulaProfessores.Add(new BlocoAulaProfessor
+                        {
+                            BlocoAulaId = blocoAula.Id,
+                            ProfessorId = profId
+                        });
+                    }
+
                     await _context.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Aula atualizada com sucesso.";
 
@@ -137,9 +179,10 @@ namespace app_horarios_BackEnd.Controllers
                 return RedirectToAction(nameof(Index));
             }
             ViewData["DisciplinaId"] = new SelectList(_context.Disciplinas, "Id", "Nome", blocoAula.DisciplinaId);
-            ViewData["ProfessorId"] = new SelectList(_context.Professores, "Id", "Nome", blocoAula.ProfessorId);
+            ViewData["Professores"] = new MultiSelectList(_context.Professores, "Id", "Nome", professorIds);
             ViewData["SalaId"] = new SelectList(_context.Salas, "Id", "Nome", blocoAula.SalaId);
             ViewData["TipoAulaId"] = new SelectList(_context.TiposAula, "Id", "Tipo", blocoAula.TipoAulaId);
+            ViewData["TurmaId"] = new SelectList(_context.Turmas, "Id", "Nome", blocoAula.TurmaId);
             return View(blocoAula);
         }
 
@@ -153,9 +196,10 @@ namespace app_horarios_BackEnd.Controllers
 
             var blocoAula = await _context.BlocosAulas
                 .Include(b => b.Disciplina)
-                .Include(b => b.Professor)
                 .Include(b => b.Sala)
                 .Include(b => b.TipoAula)
+                .Include(b => b.BlocoAulaProfessores)
+                .ThenInclude(bp => bp.Professor)
                 .FirstOrDefaultAsync(m => m.Id == id);
             if (blocoAula == null)
             {
@@ -170,14 +214,19 @@ namespace app_horarios_BackEnd.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var blocoAula = await _context.BlocosAulas.FindAsync(id);
+            var blocoAula = await _context.BlocosAulas
+                .Include(b => b.BlocoAulaProfessores)
+                .FirstOrDefaultAsync(b => b.Id == id);
             if (blocoAula != null)
             {
+                // Remove associações
+                _context.BlocosAulaProfessores.RemoveRange(blocoAula.BlocoAulaProfessores);
                 _context.BlocosAulas.Remove(blocoAula);
+
+                await _context.SaveChangesAsync();
+                TempData["SuccessMessage"] = "Aula eliminada com sucesso.";
             }
 
-            await _context.SaveChangesAsync();
-            TempData["SuccessMessage"] = "Aula eliminada com sucesso.";
             return RedirectToAction(nameof(Index));
         }
 
@@ -186,9 +235,10 @@ namespace app_horarios_BackEnd.Controllers
         {
             var blocos = await _context.BlocosAulas
                 .Include(b => b.Disciplina)
-                .Include(b => b.Professor)
                 .Include(b => b.Sala)
                 .Include(b => b.TipoAula)
+                .Include(b => b.BlocoAulaProfessores)
+                .ThenInclude(bp => bp.Professor)
                 .ToListAsync();
 
             if (!string.IsNullOrWhiteSpace(search))
@@ -203,7 +253,8 @@ namespace app_horarios_BackEnd.Controllers
                 blocos = blocos
                     .Where(b =>
                         Normalizar(b.Disciplina?.Nome ?? "").Contains(termo) ||
-                        Normalizar(b.Professor?.Nome ?? "").Contains(termo) ||
+                        Normalizar(string.Join(" ", b.BlocoAulaProfessores.Select(p => p.Professor.Nome))) // ✅ Professores múltiplos
+                            .Contains(termo) ||
                         Normalizar(b.Sala?.Nome ?? "").Contains(termo) ||
                         Normalizar(b.TipoAula?.Tipo ?? "").Contains(termo) ||
                         b.Duracao.ToString().Contains(termo))
@@ -213,6 +264,7 @@ namespace app_horarios_BackEnd.Controllers
             ViewData["Search"] = search;
             return View("Index", blocos);
         }
+
         private bool BlocoAulaExists(int id)
         {
             return _context.BlocosAulas.Any(e => e.Id == id);

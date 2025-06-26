@@ -12,6 +12,8 @@ public class Professor
     public int CategoriaId { get; set; }
     public CategoriaDocente Categoria { get; set; }
     
+    // ✅  associacoes
     public ICollection<DisciplinaCursoProfessor> DisciplinaCursoProfessor { get; set; }
-
+    
+    public ICollection<BlocoAulaProfessor> BlocoAulaProfessores { get; set; }
 }

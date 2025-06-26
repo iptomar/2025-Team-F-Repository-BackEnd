@@ -26,7 +26,8 @@ namespace app_horarios_BackEnd.Controllers.API
             var blocos = await _context.BlocosAulas
                 .Include(b => b.Disciplina)
                 .ThenInclude(d => d.DisciplinaCursoProfessor)
-                .Include(b => b.Professor)
+                .Include(b => b.BlocoAulaProfessores)
+                .ThenInclude(bp => bp.Professor)
                 .Include(b => b.Sala)
                 .Include(b => b.TipoAula)
                 .Where(b =>
@@ -37,41 +38,16 @@ namespace app_horarios_BackEnd.Controllers.API
                 )
                 .Select(b => new BlocoPreviewDto
                 {
-                    
                     Id = b.Id,
                     NomeDisciplina = b.Disciplina.Nome ?? "Disciplina indefinida",
                     TipoAula = b.TipoAula.Tipo ?? "Tipo indefinido",
                     NomeSala = b.Sala != null ? b.Sala.Nome : "Sala indefinida",
                     Duracao = b.Duracao,
-                    NomeProfessor = b.Professor != null ? b.Professor.Nome : "Sem professor"
-
+                    NomeProfessor = string.Join(", ", b.BlocoAulaProfessores.Select(bp => bp.Professor.Nome)) // ✅ Múltiplos nomes
                 })
                 .ToListAsync();
 
             return blocos;
-        }
-
-        // POST: api/BlocoAulaAPI
-        [HttpPost]
-        public async Task<ActionResult> PostBlocoHorario(BlocoAulaDto dto)
-        {
-            // Cria o bloco
-            var bloco = new BlocoAula
-            {
-                Duracao = dto.Duracao,
-                DisciplinaId = dto.DisciplinaId,
-                SalaId = dto.SalaId,
-                TipoAulaId = dto.TipoAulaId,
-                ProfessorId = dto.ProfessorId
-            };
-
-            _context.BlocosAulas.Add(bloco);
-            await _context.SaveChangesAsync(); // salva para gerar ID
-
-            
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(PostBlocoHorario), new { id = bloco.Id }, dto);
         }
         
         

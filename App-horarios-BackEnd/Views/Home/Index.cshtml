@@ -1,7 +1,80 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model List<App_horarios_BackEnd.Models.BlocoHorarioView>
+
+@{
+    ViewData["Title"] = "Grelha Horária";
+    var dias = new[] { "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado" };
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome ipt</h1>
+<div class="container mt-4">
+    <div class="text-center mb-4">
+        <h2 class="fw-bold text-title">Grelha Horária</h2>
+        <p class="text-muted">Visualize os blocos horários organizados por dia da semana e hora</p>
+    </div>
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        @if (ViewBag.HorarioAnterior != null)
+        {
+        <a asp-action="GradeHorario" asp-route-id="@ViewBag.HorarioAnterior" class="btn btn-outline-primary">
+            <i class="bi bi-arrow-left-circle"></i> Horário Anterior
+        </a>
+        }
+        else
+        {
+        <div></div>
+        }
+
+        <h4 class="fw-bold mb-0">Horário Nº @ViewBag.HorarioId</h4>
+
+        @if (ViewBag.HorarioSeguinte != null)
+        {
+        <a asp-action="GradeHorario" asp-route-id="@ViewBag.HorarioSeguinte" class="btn btn-outline-primary">
+            Próximo Horário <i class="bi bi-arrow-right-circle"></i>
+        </a>
+        }
+        else
+        {
+        <div></div>
+        }
+    </div>
+
+
+    <div class="table-responsive shadow-sm border rounded">
+        <table class="table table-bordered mb-0">
+            <thead class="table-light text-center align-middle">
+                <tr>
+                    <th style="width: 80px;">Hora</th>
+                    @foreach (var dia in dias)
+                    {
+                        <th>@dia</th>
+                    }
+                </tr>
+            </thead>
+            <tbody>
+                @for (int h = 8; h < 22; h++)
+                {
+                    <tr>
+                        <td class="text-center fw-semibold">@($"{h:00}:00")</td>
+                        @for (int dia = 1; dia <= 6; dia++)
+                        {
+                            <td class="p-1 align-top">
+                                @{
+                                    var bloco = Model.FirstOrDefault(b =>
+                                        b.DiaSemana == dia && b.HoraInicio.Hours == h);
+
+                                    if (bloco != null)
+                                    {
+                                        <div class="bg-primary text-white rounded px-2 py-1 small">
+                                            <strong>@bloco.BlocoAula.Disciplina.Nome</strong><br />
+                                            <span class="fst-italic">@string.Join(", ", bloco.BlocoAula.BlocoAulaProfessores.Select(p => p.Professor.Nome))</span><br />
+                                            <span>@($"{bloco.HoraInicio:hh\\:mm} - {bloco.HoraFim:hh\\:mm}")</span>
+                                        </div>
+                                    }
+                                }
+                            </td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
 </div>

@@ -37,12 +37,15 @@ ViewData["Title"] = "Criar Bloco de Aula";
 
         <!-- Professor -->
         <div class="mb-3">
-            <label asp-for="ProfessorId" class="form-label fw-semibold">Professor</label>
-            <select asp-for="ProfessorId" class="form-select" asp-items="ViewBag.ProfessorId">
-                <option value="">-- Selecionar Professor --</option>
+            <label class="form-label fw-semibold">Professores</label>
+            <select name="professorIds" class="form-select" multiple>
+                @foreach (var prof in (MultiSelectList)ViewBag.Professores)
+                {
+                <option value="@prof.Value">@prof.Text</option>
+                }
             </select>
-            <span asp-validation-for="ProfessorId" class="text-danger small"></span>
         </div>
+
 
         <!-- Sala -->
         <div class="mb-3">

@@ -15,12 +15,19 @@ ViewData["Title"] = "Detalhes do Bloco de Aula";
     <div class="card shadow-sm p-4 rounded bg-white border mb-4">
         <dl class="row mb-0">
             <dt class="col-sm-4 fw-semibold text-muted">
+                Código
+            </dt>
+            <dd class="col-sm-8">
+                @Html.DisplayFor(model => model.Id)
+            </dd>
+
+            <dt class="col-sm-4 fw-semibold text-muted">
                 Duração (minutos)
             </dt>
             <dd class="col-sm-8">
                 @Html.DisplayFor(model => model.Duracao)
             </dd>
-
+            
             <dt class="col-sm-4 fw-semibold text-muted">
                 Disciplina
             </dt>
@@ -46,7 +53,11 @@ ViewData["Title"] = "Detalhes do Bloco de Aula";
                 Professor
             </dt>
             <dd class="col-sm-8">
-                @Html.DisplayFor(model => model.Professor.Nome)
+                @foreach (var prof in Model.BlocoAulaProfessores)
+                {
+                <span>@prof.Professor.Nome</span><br />
+                }
+
             </dd>
         </dl>
     </div>

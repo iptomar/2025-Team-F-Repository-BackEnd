@@ -41,7 +41,12 @@ ViewData["Title"] = "Blocos de Aula";
         <tr>
             <td class="text-center">@item.Id</td>
             <td class="text-center">@item.Disciplina?.Nome</td>
-            <td class="text-center">@item.Professor?.Nome</td>
+            <td class="text-center">
+                @foreach (var prof in item.BlocoAulaProfessores)
+                {
+                <span>@prof.Professor.Nome</span><br />
+                }
+            </td>
             <td class="text-center">@item.Sala?.Nome</td>
             <td class="text-center">@item.TipoAula?.Tipo</td>
             <td class="text-center">@item.Duracao</td>

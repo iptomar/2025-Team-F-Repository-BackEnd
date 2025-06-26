@@ -668,7 +668,6 @@ public class ExcelImportService
         var disciplinas = await _context.Disciplinas.AsNoTracking().ToDictionaryAsync(d => d.Id);
         var professores = await _context.Professores.AsNoTracking().ToDictionaryAsync(p => p.Id);
         var cursos = await _context.Cursos.AsNoTracking().ToDictionaryAsync(c => c.Id);
-
         var turmas = await _context.Turmas.AsNoTracking().ToListAsync();
         var turmaLookup = turmas.ToLookup(t => t.CursoId);
 
@@ -681,25 +680,19 @@ public class ExcelImportService
                 !int.TryParse(row["n_turma"]?.ToString(), out int turmaNum))
                 continue;
 
-            // 👉 Lê horasA, horasS1 ou horasS2 (o primeiro que tiver valor)
             double totalHoras = ParseHoras(row["n_horas"]);
+            if (totalHoras == 0) continue;
 
-            if (totalHoras == 0)
-                continue;
-
-            int? professorId = int.TryParse(row["id_docente"]?.ToString(), out int prof)
-                               && professores.ContainsKey(prof)
-                ? prof
-                : null;
-
-            int? tipoAulaId = int.TryParse(row["id_tipologia"]?.ToString(), out int tipo)
-                ? tipo
-                : null;
+            int? professorId =
+                int.TryParse(row["id_docente"]?.ToString(), out int prof) && professores.ContainsKey(prof)
+                    ? prof
+                    : null;
+            int? tipoAulaId = int.TryParse(row["id_tipologia"]?.ToString(), out int tipo) ? tipo : null;
 
             if (!cursos.ContainsKey(cursoId) || !disciplinas.ContainsKey(disciplinaId))
                 continue;
-            
-            // Verifica ou cria turma
+
+            // Verifica ou cria a turma
             var turma = turmaLookup[cursoId].FirstOrDefault(t => t.Nome == GetTurmaNome(turmaNum));
             if (turma == null)
             {
@@ -710,24 +703,61 @@ public class ExcelImportService
                     Aberta = true
                 };
                 _context.Turmas.Add(turma);
-                await _context.SaveChangesAsync(); // Para gerar ID
+                await _context.SaveChangesAsync();
                 turmaLookup = (await _context.Turmas.AsNoTracking().ToListAsync()).ToLookup(t => t.CursoId);
             }
 
-            // 👉 Divide as horas em blocos (2h, 3h, 4h)
             var blocos = DividirHorasEmBlocos(totalHoras);
 
             foreach (var duracaoMin in blocos)
             {
-                _context.BlocosAulas.Add(new BlocoAula
+                // Verifica se já existe um bloco com os mesmos dados
+                var blocoExistente = await _context.BlocosAulas.FirstOrDefaultAsync(b =>
+                    b.DisciplinaId == disciplinaId &&
+                    b.TipoAulaId == tipoAulaId &&
+                    b.TurmaId == turma.Id &&
+                    b.Duracao == duracaoMin);
+
+                if (blocoExistente == null)
                 {
-                    Duracao = duracaoMin,
-                    DisciplinaId = disciplinaId,
-                    ProfessorId = professorId ?? null,
-                    TipoAulaId = tipoAulaId ?? 0,
-                    SalaId = null,
-                    TurmaId = turma.Id
-                });
+                    blocoExistente = new BlocoAula
+                    {
+                        Duracao = duracaoMin,
+                        DisciplinaId = disciplinaId,
+                        TipoAulaId = tipoAulaId ?? 0,
+                        SalaId = null,
+                        TurmaId = turma.Id,
+                        BlocoAulaProfessores = new List<BlocoAulaProfessor>()
+                    };
+
+                    _context.BlocosAulas.Add(blocoExistente);
+                    await _context.SaveChangesAsync(); // Necessário para obter bloco.Id
+                }
+
+                // Adiciona o professor se ainda não estiver associado
+                if (professorId.HasValue)
+                {
+                    var jaExiste = _context.ChangeTracker.Entries<BlocoAulaProfessor>()
+                        .Any(e =>
+                            e.Entity.BlocoAulaId == blocoExistente.Id &&
+                            e.Entity.ProfessorId == professorId.Value);
+
+                    if (!jaExiste)
+                    {
+                        var existeNaBD = await _context.BlocosAulaProfessores
+                            .AnyAsync(p => p.BlocoAulaId == blocoExistente.Id && p.ProfessorId == professorId.Value);
+
+                        if (!existeNaBD)
+                        {
+                            _context.BlocosAulaProfessores.Add(new BlocoAulaProfessor
+                            {
+                                BlocoAulaId = blocoExistente.Id,
+                                ProfessorId = professorId.Value
+                            });
+                        }
+                    }
+                }
+
             }
         }
 

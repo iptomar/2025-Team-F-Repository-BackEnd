@@ -20,13 +20,14 @@ builder.Services.AddCors(options =>
     options.AddPolicy("ProdCors", policy =>
     {
         policy.WithOrigins(
-                "https://teusite.onrender.com", // Coloca aqui o domínio real da aplicação frontend
-                "http://localhost:3000",
+                "https://api-horarios.onrender.com", // ESTE é o domínio correto do frontend
+                "http://localhost:3000",             // para desenvolvimento local
                 "http://localhost:3001"
             )
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
+
 });
 
 builder.Services.AddControllersWithViews()
@@ -57,8 +58,6 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
 {
     app.UseCors("DevCors");
-    app.UseSwagger();
-    app.UseSwaggerUI();
 }
 else
 {

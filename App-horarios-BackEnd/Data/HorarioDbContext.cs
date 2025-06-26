@@ -25,7 +25,10 @@ public class HorarioDbContext : DbContext
     
     public DbSet<BlocoHorario> BlocosHorarios { get; set; }
     
+    public DbSet<BlocoAulaProfessor> BlocosAulaProfessores { get; set; }
+
     public DbSet<Aluno> Alunos { get; set; }
+
     public DbSet<TransferenciaTurma> TransferenciasTurma { get; set; }
     public DbSet<Secretariado> Secretariados { get; set; }
     public DbSet<ComissaoCurso> ComissoesCurso { get; set; }
@@ -121,6 +124,21 @@ public class HorarioDbContext : DbContext
             .WithMany() // ou .WithMany(t => t.BlocosAula) se tiveres navegação inversa
             .HasForeignKey(b => b.TurmaId)
             .OnDelete(DeleteBehavior.Cascade); // ou Restrict, dependendo da tua lógica
+
+        // Relação muitos-para-muitos entre BlocoAula e Professor
+        modelBuilder.Entity<BlocoAulaProfessor>()
+            .HasKey(bap => new { bap.BlocoAulaId, bap.ProfessorId });
+
+        modelBuilder.Entity<BlocoAulaProfessor>()
+            .HasOne(bap => bap.BlocoAula)
+            .WithMany(b => b.BlocoAulaProfessores)
+            .HasForeignKey(bap => bap.BlocoAulaId);
+
+        modelBuilder.Entity<BlocoAulaProfessor>()
+            .HasOne(bap => bap.Professor)
+            .WithMany(p => p.BlocoAulaProfessores)
+            .HasForeignKey(bap => bap.ProfessorId);
+
 
     }
     
