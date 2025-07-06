@@ -69,16 +69,18 @@ namespace app_horarios_BackEnd.Controllers
                     return View(utilizador);
                 }
 
-                // Determina o tipo do novo utilizador
-                string tipo = "Secretariado"; // Valor por defeito
+// Guarda temporariamente com tipo por defeito
+                utilizador.Tipo = "Secretariado"; 
+                _context.Utilizadores.Add(utilizador);
+                await _context.SaveChangesAsync(); // agora o Id é gerado
 
-                // Tenta encontrar se o novo utilizador está associado a DiretorCurso
+// Verifica se está em DiretoresCurso
                 var isDiretor = await _context.DiretoresCurso
                     .AnyAsync(d => d.IdUtilizador == utilizador.Id);
 
                 if (isDiretor)
                 {
-                    tipo = "DiretorCurso";
+                    utilizador.Tipo = "DiretorCurso";
                 }
                 else
                 {
@@ -87,14 +89,14 @@ namespace app_horarios_BackEnd.Controllers
 
                     if (isComissao)
                     {
-                        tipo = "ComissaoCurso";
+                        utilizador.Tipo = "ComissaoCurso";
                     }
                 }
 
-                utilizador.Tipo = tipo;
-
-                _context.Add(utilizador);
+// Atualiza o tipo se for diferente do padrão
+                _context.Update(utilizador);
                 await _context.SaveChangesAsync();
+
                 return RedirectToAction(nameof(Index));
             }
             return View(utilizador);

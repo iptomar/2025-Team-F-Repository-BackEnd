@@ -20,31 +20,39 @@ public class HomeController : Controller
 
     public async Task<IActionResult> Index()
     {
-        int horarioId = 1; // ou buscar dinamicamente
-
-        var blocos = await _context.BlocosHorarios
-            .Include(bh => bh.BlocoAula)
-            .ThenInclude(ba => ba.Disciplina)
-            .Include(bh => bh.BlocoAula)
-            .ThenInclude(ba => ba.BlocoAulaProfessores)
-            .ThenInclude(bp => bp.Professor)
-            .Include(bh => bh.BlocoAula)
-            .ThenInclude(ba => ba.Sala)
-            .Where(bh => bh.HorarioId == horarioId)
-            .ToListAsync();
-
-        var grelha = blocos.Select(bh => new BlocoHorarioView
+        try
         {
-            DiaSemana = bh.DiaSemana,
-            HoraInicio = bh.HoraInicio,
-            HoraFim = bh.HoraFim,
-            Disciplina = bh.BlocoAula.Disciplina?.Nome ?? "—",
-            Professores = string.Join(", ", bh.BlocoAula.BlocoAulaProfessores.Select(p => p.Professor.Nome)),
-            Sala = bh.BlocoAula.Sala?.Nome ?? "—"
-        }).ToList();
+            int horarioId = 1;
 
-        return View(grelha);
+            var blocos = await _context.BlocosHorarios
+                .Include(b => b.BlocoAula)
+                .ThenInclude(a => a.Disciplina)
+                .Include(b => b.BlocoAula.BlocoAulaProfessores)
+                .ThenInclude(p => p.Professor)
+                .Where(b => b.HorarioId == horarioId)
+                .ToListAsync();
+
+            var viewModel = blocos.Select(b => new BlocoHorarioView
+            {
+                DiaSemana = b.DiaSemana,
+                HoraInicio = b.HoraInicio,
+                HoraFim = b.HoraFim,
+                BlocoAula = b.BlocoAula
+            }).ToList();
+
+            ViewBag.HorarioId = horarioId;
+            ViewBag.HorarioAnterior = null;
+            ViewBag.HorarioSeguinte = null;
+
+            return View(viewModel);
+        }
+        catch (Exception ex)
+        {
+            return Content($"Erro ao conectar à base de dados: {ex.Message}");
+        }
     }
+
+
 
     public async Task<IActionResult> GradeHorario(int id)
     {
