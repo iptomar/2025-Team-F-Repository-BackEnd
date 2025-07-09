@@ -38,3 +38,9 @@ body {
 .text-title {
   color: #78be20;
 }
+
+.bloco {
+  background-color: #78be20;
+  color: white;
+  border: none;
+}

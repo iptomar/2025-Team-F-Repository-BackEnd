@@ -14,33 +14,42 @@ var blocosRenderizados = new HashSet<int>();
     </div>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        @if (ViewBag.HorarioAnterior != null)
-        {
-        <a asp-action="GradeHorario" asp-route-id="@ViewBag.HorarioAnterior" class="btn btn-outline-primary">
-            <i class="bi bi-arrow-left-circle"></i> Horário Anterior
-        </a>
-        }
-        else
-        {
-        <div></div>
-        }
+        <div>
+            @if (ViewBag.HorarioAnterior != null)
+            {
+            <a asp-action="GradeHorario" asp-route-id="@ViewBag.HorarioAnterior" class="btn btn-ipt">
+                <i class="bi bi-arrow-left-circle "></i> Horário Anterior
+            </a>
+            }
+            else
+            {
+            <button class="btn btn-outline-secondary" disabled>
+                <i class="bi bi-arrow-left-circle"></i> Horário Anterior
+            </button>
+            }
+        </div>
 
         <h4 class="fw-bold mb-0">Horário Nº @ViewBag.HorarioId</h4>
 
-        @if (ViewBag.HorarioSeguinte != null)
-        {
-        <a asp-action="GradeHorario" asp-route-id="@ViewBag.HorarioSeguinte" class="btn btn-outline-primary">
-            Próximo Horário <i class="bi bi-arrow-right-circle"></i>
-        </a>
-        }
-        else
-        {
-        <div></div>
-        }
+        <div>
+            @if (ViewBag.HorarioSeguinte != null)
+            {
+            <a asp-action="GradeHorario" asp-route-id="@ViewBag.HorarioSeguinte" class="btn btn-ipt">
+                Próximo Horário <i class="bi bi-arrow-right-circle"></i>
+            </a>
+            }
+            else
+            {
+            <button class="btn btn-outline-secondary" disabled>
+                Próximo Horário <i class="bi bi-arrow-right-circle"></i>
+            </button>
+            }
+        </div>
     </div>
 
+
     <div class="table-responsive shadow-sm border rounded">
-        <table class="table table-bordered mb-0">
+        <table class="table table-bordered mb-0" style="table-layout: fixed;">
             <thead class="table-light text-center align-middle">
             <tr>
                 <th style="width: 120px;">Hora</th>
@@ -71,13 +80,26 @@ var blocosRenderizados = new HashSet<int>();
                 var duracao = bloco.HoraFim - bloco.HoraInicio;
                 var linhas = (int)(duracao.TotalMinutes / 30);
 
-                <td rowspan="@linhas" class="bg-primary text-white align-top p-1">
-                    <strong>@(bloco.BlocoAula.Disciplina?.Nome ?? "—")</strong><br />
-                    <span class="fst-italic">
-                                            @string.Join(", ", bloco.BlocoAula.BlocoAulaProfessores.Select(p => p.Professor?.Nome ?? "—"))
-                                        </span><br />
-                    <span>@($"{bloco.HoraInicio:hh\\:mm} - {bloco.HoraFim:hh\\:mm}")</span>
+                <td rowspan="@linhas" style="background-color: #e9f5e4; color: black; text-align: center;" class="align-top p-1">
+                    <div class="bloco-conteudo">
+                        <strong>@bloco.Disciplina</strong>
+                        <hr style="border-color: black; margin: 2px 0;" />
+                        @if (!string.IsNullOrWhiteSpace(bloco.TipoAula) && bloco.TipoAula != "—")
+                        {
+                        @bloco.TipoAula<br />
+                        }
+                        @if (!string.IsNullOrWhiteSpace(bloco.Professores))
+                        {
+                        @bloco.Professores<br />
+                        }
+                        @if (!string.IsNullOrWhiteSpace(bloco.Sala) && bloco.Sala != "—")
+                        {
+                        @bloco.Sala
+                        }
+                    </div>
                 </td>
+
+
                 blocosRenderizados.Add(bloco.Id);
                 }
                 // else: já renderizado, não fazer nada
@@ -96,6 +118,12 @@ var blocosRenderizados = new HashSet<int>();
 
 <style>
     tr {
-        height: 50px; /* Altura fixa para cada linha */
+        height: 15px; /* Altura fixa para cada linha */
+    }
+    th {
+        width: 90px;
+    }
+    td {
+        max-height: 15px;
     }
 </style>

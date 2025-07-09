@@ -17,7 +17,7 @@ namespace App_horarios_BackEnd.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        /*public async Task<IActionResult> Index()
         {
             try
             {
@@ -33,11 +33,15 @@ namespace App_horarios_BackEnd.Controllers
 
                 var viewModel = blocos.Select(b => new BlocoHorarioView
                 {
+                    Id = b.Id,
                     DiaSemana = b.DiaSemana,
                     HoraInicio = b.HoraInicio,
                     HoraFim = b.HoraFim,
-                    BlocoAula = b.BlocoAula,
-                    Id = b.Id // Adicione Id para controlar no hashset
+                    Disciplina = b.BlocoAula.Disciplina?.Nome ?? "—",
+                    TipoAula = b.BlocoAula.TipoAula?.Acronimo ?? "—",
+                    Professores = string.Join(" / ", b.BlocoAula.BlocoAulaProfessores.Select(p => p.Professor?.Nome ?? "—")),
+                    Sala = b.BlocoAula.Sala?.Nome ?? "—",
+                    BlocoAula = b.BlocoAula
                 }).ToList();
 
                 ViewBag.HorarioId = horarioId;
@@ -46,7 +50,7 @@ namespace App_horarios_BackEnd.Controllers
 
                 // Gerar intervalos
                 var listaIntervalos = new List<string>();
-                TimeSpan horaInicio = new TimeSpan(8, 0, 0);  // 08:00
+                TimeSpan horaInicio = new TimeSpan(08, 0, 0);  // 08:00
                 TimeSpan horaFim = new TimeSpan(20, 0, 0);    // 20:00
 
                 while (horaInicio < horaFim)
@@ -64,6 +68,12 @@ namespace App_horarios_BackEnd.Controllers
             {
                 return Content($"Erro ao conectar à base de dados: {ex.Message}");
             }
+        }*/
+
+        public IActionResult Index()
+        {
+            // Redireciona para GradeHorario passando o primeiro ID (1)
+            return RedirectToAction(nameof(GradeHorario), new { id = 1 });
         }
 
         public async Task<IActionResult> GradeHorario(int id)
@@ -91,12 +101,17 @@ namespace App_horarios_BackEnd.Controllers
 
             var viewModel = blocos.Select(b => new BlocoHorarioView
             {
+                Id = b.Id,
                 DiaSemana = b.DiaSemana,
                 HoraInicio = b.HoraInicio,
                 HoraFim = b.HoraFim,
-                BlocoAula = b.BlocoAula,
-                Id = b.Id // Adicione Id
+                Disciplina = b.BlocoAula.Disciplina?.Nome ?? "—",
+                TipoAula = b.BlocoAula.TipoAula?.Acronimo ?? "—",
+                Professores = string.Join(" / ", b.BlocoAula.BlocoAulaProfessores.Select(p => p.Professor?.Nome ?? "—")),
+                Sala = b.BlocoAula.Sala?.Nome ?? "—",
+                BlocoAula = b.BlocoAula
             }).ToList();
+
 
             // Gerar intervalos
             var listaIntervalos = new List<string>();

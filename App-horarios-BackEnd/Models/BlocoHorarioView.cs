@@ -7,6 +7,8 @@ public class BlocoHorarioView
     public TimeSpan HoraInicio { get; set; }
     public TimeSpan HoraFim { get; set; }
     public string Disciplina { get; set; }
+    
+    public string TipoAula { get; set; }
     public string Professores { get; set; }
     public string Sala { get; set; }
     

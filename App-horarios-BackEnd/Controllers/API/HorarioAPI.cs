@@ -241,6 +241,88 @@ namespace app_horarios_BackEnd.Controllers.API
 
             return Ok(horario.Id);
         }
+        
+        // GET: api/HorarioAPI/por-localidade/{localizacaoId}
+        [HttpGet("por-localidade/{localizacaoId}")]
+        public async Task<ActionResult<IEnumerable<Horario>>> GetHorariosPorLocalidade(int localizacaoId)
+        {
+            var turmas = await _context.Turmas
+                .Include(t => t.Curso)
+                .Where(t => t.Curso.LocalizacaoId == localizacaoId)
+                .ToListAsync();
+
+            var horarios = await _context.Horarios
+                .Where(h => turmas.Select(t => t.Id).Contains(h.TurmaId))
+                .Include(h => h.BlocosHorarios)
+                .ThenInclude(bh => bh.BlocoAula)
+                .ToListAsync();
+
+            return Ok(horarios);
+        }
+        
+        // GET: api/HorarioAPI/por-escola/{escolaId}
+        [HttpGet("por-escola/{escolaId}")]
+        public async Task<ActionResult<IEnumerable<Horario>>> GetHorariosPorEscola(int escolaId)
+        {
+            var turmas = await _context.Turmas
+                .Include(t => t.Curso)
+                .Where(t => t.Curso.EscolaId == escolaId)
+                .ToListAsync();
+
+            var horarios = await _context.Horarios
+                .Where(h => turmas.Select(t => t.Id).Contains(h.TurmaId))
+                .Include(h => h.BlocosHorarios)
+                .ThenInclude(bh => bh.BlocoAula)
+                .ToListAsync();
+
+            return Ok(horarios);
+        }
+        
+        // GET: api/HorarioAPI/por-curso/{cursoId}
+        [HttpGet("por-curso/{cursoId}")]
+        public async Task<ActionResult<IEnumerable<Horario>>> GetHorariosPorCurso(int cursoId)
+        {
+            var turmas = await _context.Turmas
+                .Where(t => t.CursoId == cursoId)
+                .ToListAsync();
+
+            var horarios = await _context.Horarios
+                .Where(h => turmas.Select(t => t.Id).Contains(h.TurmaId))
+                .Include(h => h.BlocosHorarios)
+                .ThenInclude(bh => bh.BlocoAula)
+                .ToListAsync();
+
+            return Ok(horarios);
+        }
+
+        // GET: api/HorarioAPI/por-sala/{salaId}
+        [HttpGet("por-sala/{salaId}")]
+        public async Task<ActionResult<IEnumerable<BlocoHorario>>> GetHorariosPorSala(int salaId)
+        {
+            var blocos = await _context.BlocosHorarios
+                .Include(bh => bh.BlocoAula)
+                .Where(bh => bh.BlocoAula.SalaId == salaId)
+                .ToListAsync();
+
+            return Ok(blocos);
+        }
+        
+        // GET: api/HorarioAPI/por-professor/{professorId}
+        [HttpGet("por-professor/{professorId}")]
+        public async Task<ActionResult<IEnumerable<BlocoHorario>>> GetHorariosPorProfessor(int professorId)
+        {
+            var blocoIds = await _context.BlocosAulaProfessores
+                .Where(bp => bp.ProfessorId == professorId)
+                .Select(bp => bp.BlocoAulaId)
+                .ToListAsync();
+
+            var blocos = await _context.BlocosHorarios
+                .Include(bh => bh.BlocoAula)
+                .Where(bh => blocoIds.Contains(bh.BlocoAulaId))
+                .ToListAsync();
+
+            return Ok(blocos);
+        }
 
     }
 }
