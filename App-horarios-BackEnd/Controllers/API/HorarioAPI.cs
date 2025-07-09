@@ -370,7 +370,7 @@ namespace app_horarios_BackEnd.Controllers.API
             HoraInicio = bh.HoraInicio.ToString(@"hh\:mm"),
             HoraFim = bh.HoraFim.ToString(@"hh\:mm"),
             Disciplina = bh.BlocoAula?.Disciplina?.Nome ?? "—",
-            TipoAula = bh.BlocoAula?.TipoAula?.Tipo ?? "—",
+            TipoAula = bh.BlocoAula?.TipoAula?.Acronimo ?? "—",
             Professores = bh.BlocoAula?.BlocoAulaProfessores != null 
                 ? string.Join(", ", bh.BlocoAula.BlocoAulaProfessores.Select(p => p.Professor.Nome))
                 : "—",
