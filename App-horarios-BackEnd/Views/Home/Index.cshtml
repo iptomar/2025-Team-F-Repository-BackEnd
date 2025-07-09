@@ -3,6 +3,8 @@
 @{
 ViewData["Title"] = "Grelha Horária";
 var dias = new[] { "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado" };
+var intervalos = ViewBag.Intervalos as List<string>;
+var blocosRenderizados = new HashSet<int>();
 }
 
 <div class="container mt-4">
@@ -12,36 +14,45 @@ var dias = new[] { "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado" }
     </div>
 
     <div class="d-flex justify-content-between align-items-center mb-4">
-        @if (ViewBag.HorarioAnterior != null)
-        {
-        <a asp-action="GradeHorario" asp-route-id="@ViewBag.HorarioAnterior" class="btn btn-outline-primary">
-            <i class="bi bi-arrow-left-circle"></i> Horário Anterior
-        </a>
-        }
-        else
-        {
-        <div></div>
-        }
+        <div>
+            @if (ViewBag.HorarioAnterior != null)
+            {
+            <a asp-action="GradeHorario" asp-route-id="@ViewBag.HorarioAnterior" class="btn btn-ipt">
+                <i class="bi bi-arrow-left-circle "></i> Horário Anterior
+            </a>
+            }
+            else
+            {
+            <button class="btn btn-outline-secondary" disabled>
+                <i class="bi bi-arrow-left-circle"></i> Horário Anterior
+            </button>
+            }
+        </div>
 
         <h4 class="fw-bold mb-0">Horário Nº @ViewBag.HorarioId</h4>
 
-        @if (ViewBag.HorarioSeguinte != null)
-        {
-        <a asp-action="GradeHorario" asp-route-id="@ViewBag.HorarioSeguinte" class="btn btn-outline-primary">
-            Próximo Horário <i class="bi bi-arrow-right-circle"></i>
-        </a>
-        }
-        else
-        {
-        <div></div>
-        }
+        <div>
+            @if (ViewBag.HorarioSeguinte != null)
+            {
+            <a asp-action="GradeHorario" asp-route-id="@ViewBag.HorarioSeguinte" class="btn btn-ipt">
+                Próximo Horário <i class="bi bi-arrow-right-circle"></i>
+            </a>
+            }
+            else
+            {
+            <button class="btn btn-outline-secondary" disabled>
+                Próximo Horário <i class="bi bi-arrow-right-circle"></i>
+            </button>
+            }
+        </div>
     </div>
 
+
     <div class="table-responsive shadow-sm border rounded">
-        <table class="table table-bordered mb-0">
+        <table class="table table-bordered mb-0" style="table-layout: fixed;">
             <thead class="table-light text-center align-middle">
             <tr>
-                <th style="width: 80px;">Hora</th>
+                <th style="width: 120px;">Hora</th>
                 @foreach (var dia in dias)
                 {
                 <th>@dia</th>
@@ -49,29 +60,54 @@ var dias = new[] { "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado" }
             </tr>
             </thead>
             <tbody>
-            @for (int h = 8; h < 22; h++)
+            @foreach (var intervalo in intervalos)
             {
+            var partes = intervalo.Split(" - ");
+            var horaInicio = TimeSpan.Parse(partes[0]);
+
             <tr>
-                <td class="text-center fw-semibold">@($"{h:00}:00")</td>
+                <td class="text-center fw-semibold">@intervalo</td>
                 @for (int dia = 1; dia <= 6; dia++)
                 {
-                <td class="p-1 align-top">
-                    @{
-                    var bloco = Model.FirstOrDefault(b =>
-                    b.DiaSemana == dia && b.HoraInicio.Hours == h);
+                var bloco = Model.FirstOrDefault(b =>
+                b.DiaSemana == dia &&
+                b.HoraInicio <= horaInicio && b.HoraFim > horaInicio);
 
-                    if (bloco?.BlocoAula != null)
-                    {
-                    <div class="bg-primary text-white rounded px-2 py-1 small">
-                        <strong>@(bloco.BlocoAula.Disciplina?.Nome ?? "—")</strong><br />
-                        <span class="fst-italic">
-                                                @string.Join(", ", bloco.BlocoAula.BlocoAulaProfessores.Select(p => p.Professor?.Nome ?? "—"))
-                                            </span><br />
-                        <span>@($"{bloco.HoraInicio:hh\\:mm} - {bloco.HoraFim:hh\\:mm}")</span>
+                if (bloco != null)
+                {
+                if (!blocosRenderizados.Contains(bloco.Id))
+                {
+                var duracao = bloco.HoraFim - bloco.HoraInicio;
+                var linhas = (int)(duracao.TotalMinutes / 30);
+
+                <td rowspan="@linhas" style="background-color: #e9f5e4; color: black; text-align: center;" class="align-top p-1">
+                    <div class="bloco-conteudo">
+                        <strong>@bloco.Disciplina</strong>
+                        <hr style="border-color: black; margin: 2px 0;" />
+                        @if (!string.IsNullOrWhiteSpace(bloco.TipoAula) && bloco.TipoAula != "—")
+                        {
+                        @bloco.TipoAula<br />
+                        }
+                        @if (!string.IsNullOrWhiteSpace(bloco.Professores))
+                        {
+                        @bloco.Professores<br />
+                        }
+                        @if (!string.IsNullOrWhiteSpace(bloco.Sala) && bloco.Sala != "—")
+                        {
+                        @bloco.Sala
+                        }
                     </div>
-                    }
-                    }
                 </td>
+
+
+                blocosRenderizados.Add(bloco.Id);
+                }
+                // else: já renderizado, não fazer nada
+                }
+                else
+                {
+                <td></td>
+                }
                 }
             </tr>
             }
@@ -79,3 +115,15 @@ var dias = new[] { "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado" }
         </table>
     </div>
 </div>
+
+<style>
+    tr {
+        height: 15px; /* Altura fixa para cada linha */
+    }
+    th {
+        width: 90px;
+    }
+    td {
+        max-height: 15px;
+    }
+</style>
