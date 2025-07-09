@@ -1,6 +1,5 @@
 using App_horarios_BackEnd.Models;
 using Microsoft.EntityFrameworkCore;
-using App_horarios_BackEnd.Models.DTO;
 
 namespace app_horarios_BackEnd.Data;
 

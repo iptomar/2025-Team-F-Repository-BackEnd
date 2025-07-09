@@ -112,7 +112,7 @@ namespace app_horarios_BackEnd.Controllers
                 return NotFound();
             }
 
-            if (ModelState.IsValid)
+            if (!ModelState.IsValid)
             {
                 try
                 {
