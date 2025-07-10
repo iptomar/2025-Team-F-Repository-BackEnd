@@ -93,11 +93,16 @@ namespace App_horarios_BackEnd.Controllers
 
             var blocos = await _context.BlocosHorarios
                 .Include(b => b.BlocoAula)
-                    .ThenInclude(a => a.Disciplina)
+                .ThenInclude(a => a.Disciplina)
+                .Include(b => b.BlocoAula)
+                .ThenInclude(a => a.Sala)         
+                .Include(b => b.BlocoAula)
+                .ThenInclude(a => a.TipoAula)    
                 .Include(b => b.BlocoAula.BlocoAulaProfessores)
-                    .ThenInclude(p => p.Professor)
+                .ThenInclude(p => p.Professor)
                 .Where(b => b.HorarioId == id)
                 .ToListAsync();
+
 
             var viewModel = blocos.Select(b => new BlocoHorarioView
             {
