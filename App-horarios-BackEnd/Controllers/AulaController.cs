@@ -111,27 +111,33 @@ namespace app_horarios_BackEnd.Controllers
 
             var blocoAula = await _context.BlocosAulas
                 .Include(b => b.BlocoAulaProfessores)
+                .Include(b => b.Turma) // Caso uses Turma em detalhes
                 .FirstOrDefaultAsync(b => b.Id == id);
+
             if (blocoAula == null)
             {
                 return NotFound();
             }
-            // Obter os IDs dos professores associados
+
+            // Obter IDs dos professores associados
             var professorIds = blocoAula.BlocoAulaProfessores.Select(p => p.ProfessorId).ToList();
 
             ViewData["DisciplinaId"] = new SelectList(_context.Disciplinas, "Id", "Nome", blocoAula.DisciplinaId);
             ViewData["Professores"] = new MultiSelectList(_context.Professores, "Id", "Nome", professorIds);
             ViewData["SalaId"] = new SelectList(_context.Salas, "Id", "Nome", blocoAula.SalaId);
             ViewData["TipoAulaId"] = new SelectList(_context.TiposAula, "Id", "Tipo", blocoAula.TipoAulaId);
+            ViewData["TurmaId"] = new SelectList(_context.Turmas, "Id", "Nome", blocoAula.TurmaId);
+
             return View(blocoAula);
         }
+
 
         // POST: AulaController/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Duracao,HorarioId,DisciplinaId,SalaId,TipoAulaId,ProfessorId")] BlocoAula blocoAula, List<int> professorIds)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,Duracao,HorarioId,DisciplinaId,SalaId,TipoAulaId,TurmaId")] BlocoAula blocoAula, List<int> professorIds)
         {
             if (id != blocoAula.Id)
             {
@@ -142,16 +148,14 @@ namespace app_horarios_BackEnd.Controllers
             {
                 try
                 {
-                    // Atualizar dados principais do bloco
                     _context.Update(blocoAula);
                     await _context.SaveChangesAsync();
 
-                    // Remover professores antigos
-                    var antigos = _context.BlocosAulaProfessores
-                        .Where(bp => bp.BlocoAulaId == blocoAula.Id);
+                    // Remove professores antigos
+                    var antigos = _context.BlocosAulaProfessores.Where(bp => bp.BlocoAulaId == blocoAula.Id);
                     _context.BlocosAulaProfessores.RemoveRange(antigos);
 
-                    // Adicionar os novos professores selecionados
+                    // Adiciona professores novos
                     foreach (var profId in professorIds)
                     {
                         _context.BlocosAulaProfessores.Add(new BlocoAulaProfessor
@@ -163,7 +167,6 @@ namespace app_horarios_BackEnd.Controllers
 
                     await _context.SaveChangesAsync();
                     TempData["SuccessMessage"] = "Aula atualizada com sucesso.";
-
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -178,13 +181,17 @@ namespace app_horarios_BackEnd.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
+
+            // Se der erro de validação, recarregar selects
             ViewData["DisciplinaId"] = new SelectList(_context.Disciplinas, "Id", "Nome", blocoAula.DisciplinaId);
             ViewData["Professores"] = new MultiSelectList(_context.Professores, "Id", "Nome", professorIds);
             ViewData["SalaId"] = new SelectList(_context.Salas, "Id", "Nome", blocoAula.SalaId);
             ViewData["TipoAulaId"] = new SelectList(_context.TiposAula, "Id", "Tipo", blocoAula.TipoAulaId);
             ViewData["TurmaId"] = new SelectList(_context.Turmas, "Id", "Nome", blocoAula.TurmaId);
+
             return View(blocoAula);
         }
+
 
         // GET: AulaController/Delete/5
         public async Task<IActionResult> Delete(int? id)
